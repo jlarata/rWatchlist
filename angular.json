@@ -94,8 +94,8 @@
           "builder": "angular-cli-ghpages:deploy",
           "options": {
             "baseHref": "http://jlarata.github.io/rWatchlist/",
-            "name": "jlarata",
-            "email": "ariel@cfee.gob.ar"
+            "outputPath": "dist/"
+            
           }
         }
       }

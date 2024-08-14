@@ -53,6 +53,7 @@ export class WatchListComponent {
   async createArrayOfURLs() {
     
     this.targetUrl = 'http://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
+    //this.targetUrl = 'https://letterboxd.com/'+this.username+'/watchlist/'
     let response = await fetch(this.targetUrl);
     let html = await response.text();
     let parser = new DOMParser();
@@ -101,6 +102,8 @@ populateWatchlist = async () => {
       let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
       let filmLink = 'http://cors-anywhere.herokuapp.com/https://letterboxd.com'+specUrl;
       let imgUrlContainer = 'http://cors-anywhere.herokuapp.com/https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
+      //let filmLink = 'https://letterboxd.com'+specUrl;
+      //let imgUrlContainer = 'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
 
       this.watchlist.push({
         name: title.getAttribute('alt') as string,
