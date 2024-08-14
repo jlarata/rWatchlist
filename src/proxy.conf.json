@@ -1,0 +1,11 @@
+{
+    "/api/*": {
+        "target": "https://letterboxd.com",
+        "secure": false,
+        "pathRewrite": {
+            "^/api": ""
+        },
+        "changeOrigin": false,
+        "logLevel": "debug"
+    }
+}
