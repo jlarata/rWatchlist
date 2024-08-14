@@ -1,0 +1,27 @@
+
+<div *ngIf="!isLoaded">
+    <div>
+        <p *ngIf="username">Hi, {{username | uppercase}}</p>
+        <label for="username">Ingresa tu username: </label>
+        <input id="username" [(ngModel)]="username" placeholder="username">
+    </div>
+    <button  type="button" (click)="scrapeData()">Pick me a random movie please!</button>
+
+</div>
+
+
+<div *ngIf="isLoaded">
+    <div>
+        <img src="{{randomFilm.poster}}" alt="{{randomFilm.name}}">
+        <p>It seems it's your turn to see {{randomFilm.name}},  link: {{randomFilm.url}} that's film # {{randomNumber+1}} out of {{numfilms}}</p>
+    </div>
+    <!--<span><div *ngFor="let film of watchlist">
+        <p>
+            <span>{{film.name}}</span>
+            {{film.poster}}</span> </p>
+            <span><img src="{{film.poster}}"><img></span>
+            <span><img src="{{film.poster}}"><img></span>
+        
+
+    </div>-->
+</div>
