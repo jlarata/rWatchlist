@@ -19,6 +19,7 @@ export class WatchlistService {
 
   private username: string = ''
 
+  private proxy = 'https://apricot-mixed-ixora.glitch.me/'
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
 
@@ -50,7 +51,7 @@ export class WatchlistService {
     try {
     this.username = username;
     //this.targetUrl = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
-    this.targetUrl = this.watchlistUrl+this.username+'/watchlist/'
+    this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
     //this.targetUrl = '/api/'+this.username+'/watchlist/'
     let response = await fetch(this.targetUrl);
     let html = await response.text();
@@ -104,8 +105,8 @@ export class WatchlistService {
       //let imgUrlContainer = '/api/ajax/poster'+specUrl+'std/125x187/'
       //let filmLink = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com'+specUrl;
       //let imgUrlContainer = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
-      let filmLink = 'https://letterboxd.com'+specUrl;
-      let imgUrlContainer = 'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
+      let filmLink = this.proxy+'https://letterboxd.com'+specUrl;
+      let imgUrlContainer = this.proxy+'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
   
       this.watchlist.push({
         name: title.getAttribute('alt') as string,
