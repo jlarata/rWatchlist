@@ -26,7 +26,7 @@ export class WatchlistService {
   private watchlist: Film[] = [];  
   private pages: string[] = [];
 
-  private numfilms = 0;
+  private numFilms = 0;
   private randomNumber: number = 0;
   
   private randomFilm: Film = {
@@ -36,6 +36,8 @@ export class WatchlistService {
     imgUrlContainer: ''
   }
 
+  
+    
   scrapeData = async (username: string) => {
       console.log('scraping...')
     //1. create array of urls
@@ -43,7 +45,14 @@ export class WatchlistService {
     //2. When array is ready, use that in a async-foreach-scraping function
       await this.populateWatchlist();
 
-      return await this.pickRandomFilm(this.numfilms)   
+      await this.pickRandomFilm(this.numFilms)
+
+      return {
+        randomFilm: this.randomFilm,
+        randomNumber: this.randomNumber,
+        numFilms: this.numFilms
+      }
+      
   };
 
 
@@ -99,7 +108,7 @@ export class WatchlistService {
     let a = doc.querySelectorAll('ul.poster-list > li > div > img');
   
     a.forEach((title) => {
-      this.numfilms ++;
+      this.numFilms ++;
       let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
       //let filmLink = '/api/'+specUrl;
       //let imgUrlContainer = '/api/ajax/poster'+specUrl+'std/125x187/'
@@ -121,10 +130,10 @@ export class WatchlistService {
     }  
   }
   
-  async pickRandomFilm(numfilms: number): Promise<Film>  {
-      this.randomNumber = Math.floor(Math.random() * numfilms-1);
+  async pickRandomFilm(numFilms: number): Promise<Film>  {
+      this.randomNumber = Math.floor(Math.random() * numFilms-1);
       this.randomFilm = this.watchlist[this.randomNumber];
-      console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numfilms}`)
+      console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numFilms}`)
   
       /* because of the very lazy loading, images cannot be fetched from original url
       as it turned out, images are fetched in a concatenated method. 

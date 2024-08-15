@@ -20,7 +20,7 @@ export class WatchListComponent {
   isLoaded = false;
   targetUrl = "";
   pages: string[] = [];
-  numfilms = 0;
+  numFilms = 0;
   randomNumber: number = 0;
   randomFilm: Film = {
     name: '',
@@ -39,8 +39,11 @@ export class WatchListComponent {
     if (this.username && this.username != '')
     {
       await this.watchlistService.scrapeData(this.username)
-        .then((randomFilm) => this.randomFilm = randomFilm);
-        this.isLoaded = true;
+        .then((scrapedObject) => (
+          this.randomFilm = scrapedObject.randomFilm,
+          this.randomNumber = scrapedObject.randomNumber,
+          this.numFilms = scrapedObject.numFilms,
+          this.isLoaded = true))
     }
     
   }

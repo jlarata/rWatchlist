@@ -1,21 +1,40 @@
 
-<div *ngIf="!isLoaded">
-    <div>
-        <p *ngIf="username">Hi, {{username | uppercase}}</p>
-        <label for="username">Ingresa tu username: </label>
-        <input id="username" [(ngModel)]="username" placeholder="username">
-    </div>
-    <hr>
-    <button  type="button" (click)="getRandomFilm()">Pick me a random movie please!</button>
 
+<div *ngIf="!isLoaded" class="fixed-grid has-5-cols">
+    <div class="grid">
+        <div class="cell is-col-start-3">
+            <div class="block">
+                <div class="block">
+                    <p *ngIf="username">Hi, {{username | uppercase}}</p>
+                    <label class="label is-dark" for="username">Ingresa tu username: </label>
+                <input class="input" id="username" [(ngModel)]="username" placeholder="username">
+                </div>
+                <div class="cell is-col-start-2" class="block">
+                    <button class="button is-dark is-responsive" type="button" (click)="getRandomFilm()">Pick me a random movie please!</button>
+                </div>    
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isLoaded" class="fixed-grid has-3-cols">
+    <div class="grid">    
+        <div class="cell is-col-start-2">
+                <div class="fixed-grid has-3-cols">
+                    <div class="grid">
+                        <div class="cell is-col-start-2">
+                            <img src="{{randomFilm.poster}}" alt="{{randomFilm.name}}">
+                        </div>
+                    </div>
+                    
+                    
+                    It seems it's your turn to see <a href="{{randomFilm.url}}">{{randomFilm.name}}</a><hr> that's film # {{randomNumber+1}} out of {{numFilms}}
+                </div>
+        </div>
+    </div>
 </div>
 
 
-<div *ngIf="isLoaded">
-    <div>
-        <img src="{{randomFilm.poster}}" alt="{{randomFilm.name}}">
-        <p>It seems it's your turn to see {{randomFilm.name}},  link: {{randomFilm.url}} that's film # {{randomNumber+1}} out of {{numfilms}}</p>
-    </div>
     <!--<span><div *ngFor="let film of watchlist">
         <p>
             <span>{{film.name}}</span>
@@ -25,4 +44,3 @@
         
 
     </div>-->
-</div>
