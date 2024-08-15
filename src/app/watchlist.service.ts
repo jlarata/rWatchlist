@@ -1,38 +1,156 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Film } from './film';
-import { catchError, Observable, of, tap } from 'rxjs';
+import { catchError, Observable, of, map, tap } from 'rxjs';
+import { NgModelGroup } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class WatchlistService {
 
-
+  /*httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  };
   constructor(
     private http:HttpClient,
-  ) { }
+  ) { }*/
 
-  private watchlistUrl = 'https://letterboxd.com/indialapalta/watchlist/'
+  private username: string = ''
 
-  getWatchList(): Observable<Film[]> {
-    return this.http.get<Film[]>(this.watchlistUrl)
-    .pipe(
-      tap(_ => this.log('fetched watchlist')),
-      catchError(this.handleError<Film[]>('getwatchlist'))
-    )
+  private watchlistUrl = 'https://letterboxd.com/'
+  private targetUrl = "";
+
+  private watchlist: Film[] = [];  
+  private pages: string[] = [];
+
+  private numfilms = 0;
+  private randomNumber: number = 0;
+  
+  private randomFilm: Film = {
+    name: '',
+    poster: '',
+    url: ',',
+    imgUrlContainer: ''
   }
 
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error:any): Observable<T> => {
-      console.error(error);
-      this.log(`${operation} failed: ${error.message}`);
+  scrapeData = async (username: string) => {
+      console.log('scraping...')
+    //1. create array of urls
+      await this.createArrayOfURLs(username);
+    //2. When array is ready, use that in a async-foreach-scraping function
+      await this.populateWatchlist();
 
-      return of(result as T)
+      return await this.pickRandomFilm(this.numfilms)   
+  };
+
+
+  async createArrayOfURLs(username: string) {
+    try {
+    this.username = username;
+    //this.targetUrl = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
+    this.targetUrl = this.watchlistUrl+this.username+'/watchlist/'
+    //this.targetUrl = '/api/'+this.username+'/watchlist/'
+    let response = await fetch(this.targetUrl);
+    let html = await response.text();
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(html, "text/html");
+
+    let numPages = this.calculatePages(doc);
+    let i = 1;
+            do {
+                this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
+                i++;
+            }
+            while (i <= numPages);
+    }
+    catch (error) {
+      console.log(error)
+    } console.log(this.pages)    
+  };
+
+  calculatePages(doc: Document): number {
+      let numPages: number = 1;  
+      let cantPelisElement: Element = doc.querySelector('span.js-watchlist-count') as Element;
+      if (cantPelisElement && cantPelisElement.textContent) {
+        let textContent = cantPelisElement.textContent;
+        let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
+        numPages = Math.ceil(cantPelis/28);      
+        }
+    return numPages;
+  };
+    
+  populateWatchlist = async () => {
+      for (let page of this.pages) {
+        await this.scrape(page)
+        } 
+      //eliminated method: foreach doesnt have await/async support
+      //    this.pages.forEach((page) => this.scrape(page))
+    };  
+  
+  async scrape(page: string) {
+    try {
+    let response = await fetch(page, { method: "POST"});
+    let html = await response.text();
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(html, "text/html");
+    let a = doc.querySelectorAll('ul.poster-list > li > div > img');
+  
+    a.forEach((title) => {
+      this.numfilms ++;
+      let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
+      //let filmLink = '/api/'+specUrl;
+      //let imgUrlContainer = '/api/ajax/poster'+specUrl+'std/125x187/'
+      //let filmLink = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com'+specUrl;
+      //let imgUrlContainer = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
+      let filmLink = 'https://letterboxd.com'+specUrl;
+      let imgUrlContainer = 'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
+  
+      this.watchlist.push({
+        name: title.getAttribute('alt') as string,
+        poster: 'not yet...',
+        url: filmLink,
+        imgUrlContainer: imgUrlContainer,
+        })
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }  
+  }
+  
+  async pickRandomFilm(numfilms: number): Promise<Film>  {
+      this.randomNumber = Math.floor(Math.random() * numfilms-1);
+      this.randomFilm = this.watchlist[this.randomNumber];
+      console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numfilms}`)
+  
+      /* because of the very lazy loading, images cannot be fetched from original url
+      as it turned out, images are fetched in a concatenated method. 
+      below is the method to get them*/
+      try {
+        let response = await fetch(this.randomFilm.imgUrlContainer);
+        let html = await response.text();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
+        let i = doc.querySelector('img');
+        //console.log(i?.getAttribute('src'))
+  
+        this.randomFilm.poster = i?.getAttribute('src') as string;
+        /* this method scrape the film specific page. to what end?
+        let response = await fetch(this.watchlist[randomNumber].url);
+        let html = await response.text();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
+        let i = doc.querySelector('section.poster-list > a > div > img');
+        let imgUrl = i?.getAttribute('src');
+        console.log(html);*/
+      }
+      catch (error) {
+        console.log(error)
+      }
+      console.log('122')
+      return this.randomFilm;
+        
     }
   }
-
-  private log(message: string) {
-    console.log('asd')
-  }
-}
