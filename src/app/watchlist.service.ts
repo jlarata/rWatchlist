@@ -40,7 +40,7 @@ export class WatchlistService {
   wakeTheFake = async () => {
     const myRequest = new Request(this.proxy);
     await fetch(myRequest).then((response) => {
-      console.log("ping: ", response.status)
+      //console.log("ping: ", response.status)
       if (response.status == 200) {
         this.status = 'on';
       } else {
@@ -89,7 +89,7 @@ export class WatchlistService {
     }
     catch (error) {
       console.log(error)
-    } console.log(this.pages)    
+    } //console.log(this.pages)    
   };
 
   calculatePages(doc: Document): number {
@@ -145,7 +145,7 @@ export class WatchlistService {
   async pickRandomFilm(numFilms: number): Promise<Film>  {
       this.randomNumber = Math.floor(Math.random() * numFilms-1);
       this.randomFilm = this.watchlist[this.randomNumber];
-      console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numFilms}`)
+      //console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numFilms}`)
   
       /* because of the very lazy loading, images cannot be fetched from original url
       as it turned out, images are fetched in a concatenated method. 
