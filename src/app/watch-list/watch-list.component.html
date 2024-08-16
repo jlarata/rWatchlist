@@ -1,6 +1,8 @@
 
+<app-loading *ngIf="isOnline=='off'"></app-loading>
+<div class="local-scope">
 
-<div *ngIf="!isLoaded" class="fixed-grid has-5-cols">
+<div *ngIf="isOnline=='on' && !isLoaded" class="fixed-grid has-5-cols">
     <div class="grid">
         <div class="cell is-col-start-3">
             <div class="block">
@@ -37,6 +39,7 @@
     </div>
 </div>
 
+</div>
 
     <!--<span><div *ngFor="let film of watchlist">
         <p>

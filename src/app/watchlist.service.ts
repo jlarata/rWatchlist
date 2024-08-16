@@ -28,6 +28,7 @@ export class WatchlistService {
 
   private numFilms = 0;
   private randomNumber: number = 0;
+  private status = 'off'
   
   private randomFilm: Film = {
     name: '',
@@ -36,6 +37,18 @@ export class WatchlistService {
     imgUrlContainer: ''
   }
 
+  wakeTheFake = async () => {
+    const myRequest = new Request(this.proxy);
+    await fetch(myRequest).then((response) => {
+      console.log("ping: ", response.status)
+      if (response.status == 200) {
+        this.status = 'on';
+      } else {
+        this.status = 'off';
+      }
+    });
+    return this.status;   
+  }
     
   scrapeData = async (username: string) => {
       console.log('scraping...')
@@ -163,12 +176,3 @@ export class WatchlistService {
         
     }
   }
-
-
-   /* didn't work as planned.
-      using a cron-job now to wake the CORSProxy server hosted in glitch
-    wakeTheFake() {
-    const ping = new XMLHttpRequest();
-    ping.open("GET", this.proxy);
-    console.log("ping: ", ping.status)
-  }*/
