@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { WatchlistService } from '../watchlist.service';
 import { Film } from '../film';
 import { NgFor, NgIf, UpperCasePipe } from '@angular/common';
@@ -35,6 +35,7 @@ export class WatchListComponent {
 
   constructor (private watchlistService: WatchlistService) {}
 
+
   async getRandomFilm() {
     if (this.username && this.username != '')
     {
@@ -52,3 +53,10 @@ export class WatchListComponent {
   
 
 
+
+/*didn't work as planned.
+      using a cron-job now to wake the CORSProxy server hosted in glitch
+    ngOnInit(): void {
+    console.log("ping")
+    this.watchlistService.wakeTheFake();
+  }*/

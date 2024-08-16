@@ -5,11 +5,14 @@
         <div class="cell is-col-start-3">
             <div class="block">
                 <div class="block">
-                    <p *ngIf="username">Hi, {{username | uppercase}}</p>
-                    <label class="label is-dark" for="username">Ingresa tu username: </label>
+                    
+                <label class="label is-dark" for="username">Ingresa tu username: </label>
                 <input class="input" id="username" [(ngModel)]="username" placeholder="username">
+                
+                <div class="mt-5" *ngIf="username">Hi, {{username | uppercase}}</div>
+                
                 </div>
-                <div class="cell is-col-start-2" class="block">
+                <div>
                     <button class="button is-dark is-responsive" type="button" (click)="getRandomFilm()">Pick me a random movie please!</button>
                 </div>    
             </div>

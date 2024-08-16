@@ -95,7 +95,7 @@
           "builder": "angular-cli-ghpages:deploy",
           "options": {
             "baseHref": "http://jlarata.github.io/rWatchlist/",
-            "outputPath": "dist/"
+            "outputPath": "dist/rWatchlist/browser"
             
           }
         }

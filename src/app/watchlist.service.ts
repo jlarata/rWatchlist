@@ -36,7 +36,6 @@ export class WatchlistService {
     imgUrlContainer: ''
   }
 
-  
     
   scrapeData = async (username: string) => {
       console.log('scraping...')
@@ -164,3 +163,12 @@ export class WatchlistService {
         
     }
   }
+
+
+   /* didn't work as planned.
+      using a cron-job now to wake the CORSProxy server hosted in glitch
+    wakeTheFake() {
+    const ping = new XMLHttpRequest();
+    ping.open("GET", this.proxy);
+    console.log("ping: ", ping.status)
+  }*/
