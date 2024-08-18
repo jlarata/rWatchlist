@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoadingComponent } from '../loading/loading.component';
 import { WatchlistService } from '../watchlist.service';
 import { Film } from '../film';
-import { NgFor, NgIf, UpperCasePipe } from '@angular/common';
+import { NgFor, NgIf, NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { NgModel } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { HttpHeaders } from '@angular/common/http';
@@ -11,7 +11,7 @@ import { fromEvent } from 'rxjs';
 @Component({
   selector: 'app-watch-list',
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule, UpperCasePipe, LoadingComponent],
+  imports: [NgFor, NgIf, FormsModule, UpperCasePipe, LoadingComponent, NgOptimizedImage],
   templateUrl: './watch-list.component.html',
   styleUrl: './watch-list.component.css'
 })
@@ -38,6 +38,7 @@ export class WatchListComponent implements OnInit {
   })
 
   constructor (private watchlistService: WatchlistService) {}
+
 
   async ngOnInit() {
     await this.watchlistService.wakeTheFake()

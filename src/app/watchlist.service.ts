@@ -71,9 +71,7 @@ export class WatchlistService {
   async createArrayOfURLs(username: string) {
     try {
     this.username = username;
-    //this.targetUrl = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
     this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
-    //this.targetUrl = '/api/'+this.username+'/watchlist/'
     let response = await fetch(this.targetUrl);
     let html = await response.text();
     let parser = new DOMParser();
@@ -122,11 +120,7 @@ export class WatchlistService {
     a.forEach((title) => {
       this.numFilms ++;
       let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
-      //let filmLink = '/api/'+specUrl;
-      //let imgUrlContainer = '/api/ajax/poster'+specUrl+'std/125x187/'
-      //let filmLink = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com'+specUrl;
-      //let imgUrlContainer = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
-      let filmLink = this.proxy+'https://letterboxd.com'+specUrl;
+      let filmLink = 'https://letterboxd.com'+specUrl;
       let imgUrlContainer = this.proxy+'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
   
       this.watchlist.push({
