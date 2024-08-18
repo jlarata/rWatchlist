@@ -152,7 +152,7 @@ export class WatchlistService {
         let i = doc.querySelector('img');
         //console.log(i?.getAttribute('src'))
   
-        this.randomFilm.poster = i?.getAttribute('src') as string;
+        this.randomFilm.poster = (i?.getAttribute('src') as string).replace("125-0-187", "460-0-690");
         /* this method scrape the film specific page. to what end?
         let response = await fetch(this.watchlist[randomNumber].url);
         let html = await response.text();

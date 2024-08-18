@@ -435,10 +435,12 @@ export class LoadingComponent implements OnInit {
 
   setIntervalForRandomMessage = () => {
     this.intervalForRM = setInterval(this.setRandomMessage, 3000);
+    console.log("interval set")
   }
 
   clearIntervalForRandomMessage = () => {
     clearInterval(this.intervalForRM);
+    console.log("interval removed")
   }
 
  setRandomMessage = () => {
@@ -451,6 +453,6 @@ export class LoadingComponent implements OnInit {
     }
   }
  
-  intervalForRM = setInterval(this.setRandomMessage, 30000)
+  intervalForRM = setInterval(this.setRandomMessage, 3000)
   
 }
