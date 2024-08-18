@@ -25,16 +25,16 @@
 <div *ngIf="isLoaded" class="fixed-grid has-3-cols">
     <div class="grid">    
         <div class="cell is-col-start-2">
-                <div class="fixed-grid has-3-cols">
-                    <div class="grid">
-                        <div class="cell is-col-start-2">
-                            <img src="{{randomFilm.poster}}" alt="{{randomFilm.name}}">
-                            <img ngSrc="{{randomFilm.poster}}" alt="{{randomFilm.name}}">
-                        </div>
-                    </div>
+                <div class="randomFilmContainer">
+                   
+                    <img ngSrc="{{randomFilm.poster}}" width="200" height="100" alt="{{randomFilm.name}}">                    
                     
-                    
-                    It seems it's your turn to see <a href="{{randomFilm.url}}">{{randomFilm.name}}</a><hr> that's film # {{randomNumber+1}} out of {{numFilms}}
+                    <p>It seems it's your turn to see <a href="{{randomFilm.url}}">{{randomFilm.name}}</a></p>
+                        
+                    <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>
+
+                    <button class="button is-dark" type="button" (click)="goBack()">I don't like it. Go back please!</button>
+
                 </div>
         </div>
     </div>

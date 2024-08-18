@@ -37,16 +37,21 @@ export class WatchListComponent implements OnInit {
     'X-Requested-With': 'XMLHttpRequest'
   })
 
-  constructor (private watchlistService: WatchlistService) {}
 
+  constructor (private watchlistService: WatchlistService, private loadingComponent: LoadingComponent) {
+    this.loadingComponent.setIntervalForRandomMessage()
+  }
+ 
 
   async ngOnInit() {
+    
     await this.watchlistService.wakeTheFake()
     .then((status) => (
-      this.isOnline = status
+      this.isOnline = status,
+      this.loadingComponent.clearIntervalForRandomMessage()
       ))
     }
-
+  
 
   keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
   listener = this.keydown$.subscribe((x) => {if (x.key === "Enter"){
@@ -72,6 +77,10 @@ export class WatchListComponent implements OnInit {
           this.isLoaded = true))
     }
     
+  }
+
+  goBack() {
+    this.isLoaded = false;
   }
   
 }

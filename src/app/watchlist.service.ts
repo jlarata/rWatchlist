@@ -165,7 +165,6 @@ export class WatchlistService {
       catch (error) {
         console.log(error)
       }
-      console.log('122')
       return this.randomFilm;
         
     }

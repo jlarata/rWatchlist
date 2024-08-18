@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, input, OnInit } from '@angular/core';
 import { Injectable } from '@angular/core';
 
 @Component({
@@ -427,37 +427,30 @@ export class LoadingComponent implements OnInit {
     "Zeroing Crime Network"
   ]
 
-  ngOnInit() {    
-    this.setRandomMessage()
-    setTimeout(this.setRandomMessage, 5000);
-    setTimeout(this.setRandomMessage, 10000);
-    setTimeout(this.setRandomMessage, 15000);
-  }
+  ngOnInit() {      
+    this.setRandomMessage();
+    }
+
   
+
+  setIntervalForRandomMessage = () => {
+    this.intervalForRM = setInterval(this.setRandomMessage, 3000);
+  }
+
+  clearIntervalForRandomMessage = () => {
+    clearInterval(this.intervalForRM);
+  }
 
  setRandomMessage = () => {
     if (this.messages) {
       this.randomMessage = this.messages[Math.floor(Math.random() * (this.messages.length)-1)]
-      console.log(this.randomMessage);
+      //console.log(this.randomMessage);
     } else {
       this.randomMessage = "not so random message";
-      console.log(this.randomMessage);
+      //console.log(this.randomMessage);
     }
   }
  
-
-/* :/ :@
-
-  startInterval() {
-    setInterval(this.setRandomMessage, 5000);
-  }
-  
-  //asd = clearInterval(this.randMessInterval);
-
-  stopRandomMessageGeneration() {
-    clearInterval(setInterval(this.setRandomMessage, 5000));
-  }
-    
-  */
+  intervalForRM = setInterval(this.setRandomMessage, 30000)
   
 }
