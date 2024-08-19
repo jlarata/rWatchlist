@@ -23,6 +23,7 @@ export class WatchlistService {
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
   private isSameUser = false;
+  private emptyWatchlist = false;
 
   private watchlist: Film[] = [];  
   private pages: string[] = [];
@@ -32,10 +33,10 @@ export class WatchlistService {
   private status = 'off'
   
   private randomFilm: Film = {
-    name: '',
-    poster: '',
-    url: ',',
-    imgUrlContainer: ''
+    name: '...',
+    poster: '...',
+    url: '...',
+    imgUrlContainer: '...'
   }
 
   wakeTheFake = async () => {
@@ -52,19 +53,22 @@ export class WatchlistService {
   }
     
   scrapeData = async (username: string) => {
-      console.log('scraping...')
+    console.log('scraping...')
     //1. create array of urls
       await this.createArrayOfURLs(username);
     //2. When array is ready, use that in a async-foreach-scraping function
+      if (this.emptyWatchlist === false) {
       await this.populateWatchlist();
 
       await this.pickRandomFilm(this.numFilms)
-      
-
-      return {
-        randomFilm: this.randomFilm,
-        randomNumber: this.randomNumber,
-        numFilms: this.numFilms
+    } else {
+      console.log('this user has no films in the watchlist')
+    }
+    return {
+      randomFilm: this.randomFilm,
+      randomNumber: this.randomNumber,
+      numFilms: this.numFilms,
+      emptyWatchlist: this.emptyWatchlist
       }
       
   };
@@ -86,14 +90,22 @@ export class WatchlistService {
         let parser = new DOMParser();
         let doc = parser.parseFromString(html, "text/html");
 
-        let numPages = this.calculatePages(doc);
-        let i = 1;
+        if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]) !== 0) {
+          //console.log(Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]))
+          let numPages = this.calculatePages(doc);
+          let i = 1;
             do {
                 this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
                 i++;
             }
             while (i <= numPages);
-        this.isSameUser = false;
+          this.isSameUser = false;
+          this.emptyWatchlist = false;
+        }
+        else {
+          this.emptyWatchlist = true;
+        }
+        
       } else {
         console.log(`recycling url array for ${username}`)
         this.isSameUser = true;

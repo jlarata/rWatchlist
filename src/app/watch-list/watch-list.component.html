@@ -25,7 +25,7 @@
     </div>
 </div>
 
-<div *ngIf="isLoaded" class="fixed-grid has-3-cols">
+<div *ngIf="isLoaded && (emptyWatchList == false)" class="fixed-grid has-3-cols">
     <div class="grid">    
         <div class="cell is-col-start-2">
                 <div class="randomFilmContainer">
@@ -37,6 +37,22 @@
                     <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>
 
                     <button class="button is-dark" type="button" (click)="goBack()">I don't like it. Go back please!</button>
+
+                </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isLoaded && (emptyWatchList == true)" class="fixed-grid has-3-cols">
+    <div class="grid">    
+        <div class="cell is-col-start-2">
+                <div class="randomFilmContainer">
+                   
+                    <img src="../assets/img/logo.png" width="64" height="64" alt="uops!">                    
+                    
+                    <p>It seems thtat {{username}} has no films in the watchlist yet</p>
+                        
+                    <button class="button is-dark" type="button" (click)="goBack()">Go back</button>
 
                 </div>
         </div>

@@ -21,6 +21,7 @@ export class WatchListComponent implements OnInit {
   //posterlist: string[] = [];
   isOnline = 'off';
   isLoaded = false;
+  emptyWatchList = false;
   targetUrl = "";
   pages: string[] = [];
   numFilms = 0;
@@ -71,10 +72,12 @@ export class WatchListComponent implements OnInit {
     {
       await this.watchlistService.scrapeData(this.username)
         .then((scrapedObject) => (
+          this.emptyWatchList = scrapedObject.emptyWatchlist,
           this.randomFilm = scrapedObject.randomFilm,
           this.randomNumber = scrapedObject.randomNumber,
           this.numFilms = scrapedObject.numFilms,
-          this.isLoaded = true))
+          this.isLoaded = true
+          ))
     }
     
   }
