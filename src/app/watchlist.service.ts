@@ -22,6 +22,7 @@ export class WatchlistService {
   private proxy = 'https://apricot-mixed-ixora.glitch.me/'
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
+  private isSameUser = false;
 
   private watchlist: Film[] = [];  
   private pages: string[] = [];
@@ -58,6 +59,7 @@ export class WatchlistService {
       await this.populateWatchlist();
 
       await this.pickRandomFilm(this.numFilms)
+      
 
       return {
         randomFilm: this.randomFilm,
@@ -70,20 +72,33 @@ export class WatchlistService {
 
   async createArrayOfURLs(username: string) {
     try {
-    this.username = username;
-    this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
-    let response = await fetch(this.targetUrl);
-    let html = await response.text();
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(html, "text/html");
+      if (this.username !== username)
+      {
+        console.log(`creating new array of urls for ${username}`)
+        //clear array in case this method has ben previously called with another username
+        this.pages = [];
+        this.username = username;
+        //this.targetUrl = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
+        this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
+        //this.targetUrl = '/api/'+this.username+'/watchlist/'
+        let response = await fetch(this.targetUrl);
+        let html = await response.text();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
 
-    let numPages = this.calculatePages(doc);
-    let i = 1;
+        let numPages = this.calculatePages(doc);
+        let i = 1;
             do {
                 this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
                 i++;
             }
             while (i <= numPages);
+        this.isSameUser = false;
+      } else {
+        console.log(`recycling url array for ${username}`)
+        this.isSameUser = true;
+      }
+    
     }
     catch (error) {
       console.log(error)
@@ -102,41 +117,52 @@ export class WatchlistService {
   };
     
   populateWatchlist = async () => {
+    if (!this.isSameUser) {
+      this.watchlist = [];
+      this.numFilms = 0;
+      console.log(`populating watchlist array for ${this.username}`)      
       for (let page of this.pages) {
         await this.scrape(page)
-        } 
+        }
+      } else {
+          console.log(`recycling ${this.username}'s watchlist`)
+      }   
       //eliminated method: foreach doesnt have await/async support
       //    this.pages.forEach((page) => this.scrape(page))
     };  
   
   async scrape(page: string) {
-    try {
-    let response = await fetch(page, { method: "POST"});
-    let html = await response.text();
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(html, "text/html");
-    let a = doc.querySelectorAll('ul.poster-list > li > div > img');
-  
-    a.forEach((title) => {
-      this.numFilms ++;
-      let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
-      let filmLink = 'https://letterboxd.com'+specUrl;
-      let imgUrlContainer = this.proxy+'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
-  
-      this.watchlist.push({
-        name: title.getAttribute('alt') as string,
-        poster: 'not yet...',
-        url: filmLink,
-        imgUrlContainer: imgUrlContainer,
-        })
-      })
-    }
+    try {       
+         
+        let response = await fetch(page, { method: "POST"});
+        let html = await response.text();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
+        let a = doc.querySelectorAll('ul.poster-list > li > div > img');
+      
+        a.forEach((title) => {
+          this.numFilms ++;
+          let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
+          let filmLink = 'https://letterboxd.com'+specUrl;
+          let imgUrlContainer = this.proxy+'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
+      
+          this.watchlist.push({
+            name: title.getAttribute('alt') as string,
+            poster: 'not yet...',
+            url: filmLink,
+            imgUrlContainer: imgUrlContainer,
+            })
+          })
+          
+      }
+    
     catch (error) {
       console.log(error)
     }  
   }
   
   async pickRandomFilm(numFilms: number): Promise<Film>  {
+      //console.log(`number of films: ${this.numFilms}`)
       this.randomNumber = Math.floor(Math.random() * numFilms-1);
       this.randomFilm = this.watchlist[this.randomNumber];
       //console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numFilms}`)
