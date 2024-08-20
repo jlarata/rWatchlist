@@ -1,5 +1,4 @@
 .randomFilmContainer {
-
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,3 +37,16 @@
 .asd {
     border: solid 1px white;
 }
+
+@media screen and (max-width: 768px) {
+    .personal-responsive {
+      margin-top: 5rem;
+      margin-bottom: 2rem;
+      /*margin-left: -2rem;*/
+      display: flex;
+      flex-direction: column;
+      align-items:center;
+      gap: 2rem;
+    }
+  }
+  

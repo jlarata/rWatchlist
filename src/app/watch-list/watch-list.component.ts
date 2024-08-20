@@ -3,9 +3,7 @@ import { LoadingSiteComponent } from '../loading-site/loading-site.component';
 import { WatchlistService } from '../watchlist.service';
 import { Film } from '../film';
 import { NgFor, NgIf, NgOptimizedImage, UpperCasePipe } from '@angular/common';
-import { NgModel } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { HttpHeaders } from '@angular/common/http';
 import { fromEvent } from 'rxjs';
 import { LoadingComponentComponent } from "../loading-component/loading-component.component";
 
@@ -18,12 +16,20 @@ import { LoadingComponentComponent } from "../loading-component/loading-componen
 })
 export class WatchListComponent implements OnInit {
 
-  //watchlist: Film[] = [];
-  //posterlist: string[] = [];
+  username: string = '';
+  lastUsername: string = '';
+
+  //the service wakes up the hosting returns asynchronously this string as "on"
   isOnline = 'off';
+  //at the end of a successful fetch (scrapeData), getRandomFilm() sets this on true
   isLoaded = false;
+  //if is fetching for a new username, getRandomFilm() will set this on true. 
+  //at the end of a successful fetch will set it false again
   isLoading = false;
+  //if the service detects the user exist but have no films in the watchlist:
   emptyWatchList = false;
+
+  //general variables to be provided from the service
   targetUrl = "";
   pages: string[] = [];
   numFilms = 0;
@@ -34,42 +40,41 @@ export class WatchListComponent implements OnInit {
     url: ',',
     imgUrlContainer: ''
   }
-  username: string = '';
-  lastUsername: string = '';
-
-  headers: HttpHeaders = new HttpHeaders ({
-    'X-Requested-With': 'XMLHttpRequest'
-  })
-
 
   constructor (private watchlistService: WatchlistService, private loadingSiteComponent: LoadingSiteComponent) {
     this.loadingSiteComponent.setIntervalForRandomMessage()
   }
  
-
-  async ngOnInit() {
-    
-    await this.watchlistService.wakeTheFake()
-    .then((status) => (
-      this.isOnline = status,
-      this.loadingSiteComponent.clearIntervalForRandomMessage()
-      ))
-    }
-  
-
+  //if a key is pressed...
   keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
+  //and in case that key is Enter...
   listener = this.keydown$.subscribe((x) => {if (x.key === "Enter"){
     this.bindReturn()
   }})
 
   bindReturn()  {
+    //get input field...
     let inputField: HTMLElement = document.getElementById('username')!;
+    //and if the input field it is active...
     if (inputField === document.activeElement)
     {
+      //go! (the idea being improve UX. Intuitive fill-field-and-press-enter logic)
       this.getRandomFilm();
     }
   } 
 
+
+  async ngOnInit() {
+    //the CORS Proxy is mounted in a free host. so this method ask the service to wakes it up.
+    //in the meantime loadingSiteComponent is trying to entertain user.
+    await this.watchlistService.wakeTheFake()
+    .then((status) => (
+      this.isOnline = status,
+      //stops the loadingSiteComponent from keep switching random messages
+      this.loadingSiteComponent.clearIntervalForRandomMessage()
+      ))
+    }
+    
   async getRandomFilm() {
     if (this.username && this.username != '')
     { 
