@@ -1,4 +1,23 @@
 .headerWrapper {
     display: block;
-    min-height: 25vh;
+    /*min-height: 25vh;*/
+    padding: 2rem 0rem;    
+    position: relative;
+}
+
+.headerWrapper:before {
+    content: "";
+    left: 5%;
+    width: 75%;
+    position: absolute;
+    bottom: 0; 
+    border-bottom: 1px solid gray;
+    /*border-left: 1px solid gray;*/
+}
+
+
+
+.title {
+    margin-left: 5%;
+    white-space: nowrap;
 }

@@ -2,62 +2,99 @@
 <app-loading *ngIf="isOnline=='off'"></app-loading>
 <div class="local-scope">
 
-<div *ngIf="isOnline=='on' && !isLoaded" class="fixed-grid has-5-cols">
+<div class="fixed-grid has-10-cols">
     <div class="grid">
-        <div class="cell is-col-start-3">
-            <div class="block title-container">
-                <img src=".\assets\img\logo.png" width="32" height="32" alt="image">
-                <p class="title is-3 has-text-text-80">rWatchlist</p>
-                </div> 
-                <div class="block">
-                    
-                <label class="label is-dark" for="username">Ingresa tu username: </label>
-                <input class="input" id="username" [(ngModel)]="username" placeholder="username">
-                
-                <div class="mt-5" *ngIf="username">Hi, {{username | uppercase}}</div>
-                
-                </div>
-                <div>
-                    <button class="button is-dark" type="button" (click)="getRandomFilm()">Pick me a random movie please!</button>
-                </div>    
+        <div *ngIf="isOnline=='on'" class="cell is-col-start-2 is-col-span-3 is-row-start-4">
+            <div class="title-container">
+                <span class="title is-4">Random Movie Selector</span>
+            </div>
             
+            <div class="cell is-row-start-10">
+    
+                    <div class="form-container block">
+                        
+                        <label class="label is-dark" for="username">Enter your letterboxd username</label>
+                        <input class="input" id="username" [(ngModel)]="username" placeholder="username">
+                    
+                        <div class="mt-1" *ngIf="username">Hi, {{username}}</div>
+                    
+                        <button *ngIf="(isLoaded == false) && (emptyWatchList == false)" class="button is-dark" type="button" (click)="getRandomFilm()">Pick a random movie for me please!</button>
+                        
+                        <button *ngIf="isLoaded" class="button is-dark" type="button" (click)="getRandomFilm()">Pick again please!</button>
+                        
+
+                    </div>
+                    
+                    
+            </div>
         </div>
+
+        <div class="cell is-col-start-5 is-col-span-4 is-row-start-4">
+            <app-loading-component *ngIf="(isLoading == true)"></app-loading-component>
+            <div class="">    
+                <div *ngIf="isLoaded && (emptyWatchList == false)" class="randomFilmContainer">
+                        
+                    <!-- unuseful anymore withe the new design <button class="button is-dark" type="button" (click)="goBack()">Go back</button> -->
+    
+                    <div class="title-container-b">
+                        <span class="title is-4">{{randomFilm.name}}</span>
+                    </div>
+                    <img ngSrc="{{randomFilm.poster}}" width="166" height="249" alt="{{randomFilm.name}} priority">                    
+                    
+                    <p>It seems it's your turn to see <a href="{{randomFilm.url}}">{{randomFilm.name}}</a></p>
+                        
+                    <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>
+    
+                    <!--<button class="button is-dark" type="button" (click)="getRandomFilm()">Pick again please!</button>-->
+                </div> 
+                
+                <div *ngIf="isLoaded && (emptyWatchList == true)" class="fixed-grid has-2-cols">
+                    <div class="grid">    
+                        <div class="cell is-col">
+                                <div class="randomFilmContainer">
+                                   
+                                    <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                    
+                                    
+                                    <p>It seems thtat {{lastUsername}} has no films in the watchlist yet</p>
+                                        
+                                    <!--<button class="button is-dark" type="button" (click)="goBack()">Got it!</button>-->
+                
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+        
+
+
     </div>
 </div>
 
-<div *ngIf="isLoaded && (emptyWatchList == false)" class="fixed-grid has-3-cols">
+<!--<div *ngIf="isLoaded && (emptyWatchList == false)" class="fixed-grid has-3-cols">
     <div class="grid">    
         <div class="cell is-col-start-2">
                 <div class="randomFilmContainer">
-                   
+                    
+                    <button class="button is-dark" type="button" (click)="goBack()">Go back</button>
+
                     <img srcset="{{randomFilm.poster}}" width="250" height="374" alt="{{randomFilm.name}}">                    
                     
                     <p>It seems it's your turn to see <a href="{{randomFilm.url}}">{{randomFilm.name}}</a></p>
                         
                     <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>
 
-                    <button class="button is-dark" type="button" (click)="goBack()">I don't like it. Go back please!</button>
+                    <button class="button is-dark" type="button" (click)="getRandomFilm()">Pick again please!</button>
 
                 </div>
         </div>
     </div>
-</div>
+</div>-->
 
-<div *ngIf="isLoaded && (emptyWatchList == true)" class="fixed-grid has-3-cols">
-    <div class="grid">    
-        <div class="cell is-col-start-2">
-                <div class="randomFilmContainer">
-                   
-                    <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                    
-                    
-                    <p>It seems thtat {{username}} has no films in the watchlist yet</p>
-                        
-                    <button class="button is-dark" type="button" (click)="goBack()">Go back</button>
 
-                </div>
-        </div>
-    </div>
-</div>
 
 </div>
 

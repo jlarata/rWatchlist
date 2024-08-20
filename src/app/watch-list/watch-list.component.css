@@ -1,4 +1,5 @@
 .randomFilmContainer {
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -6,8 +7,34 @@
     gap: 10px;
 }
 
+.title-container-b::first-letter {
+    color: rgb(202, 22, 22)
+}
+
 .title-container {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: solid 1px gray
+}
+
+.title-container-b {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: solid 1px gray
+}
+
+.form-container {
     display: flex;
-    justify-content:center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    gap: 10px;    
+}
+
+.button {
+    white-space: normal;
+}
+
+.asd {
+    border: solid 1px white;
 }

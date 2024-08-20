@@ -5,15 +5,15 @@ import { Injectable } from '@angular/core';
   selector: 'app-loading',
   standalone: true,
   imports: [],
-  templateUrl: './loading.component.html',
-  styleUrl: './loading.component.css'
+  templateUrl: './loading-site.component.html',
+  styleUrl: './loading-site.component.css'
 })
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class LoadingComponent implements OnInit {
+export class LoadingSiteComponent implements OnInit {
   
   randomMessage = '';
   messages: string[] = [
