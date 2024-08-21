@@ -4,9 +4,21 @@
             <div class="cell is-col-start-2 is-col-span-3">
                 <div class="block title-container">
                     <img src=".\assets\img\logo.png" width="32" height="32" alt="image">
-                    <p class="title is-3 has-text-text-80">rWatchlist</p>
-                    </div>         
+                    <p>
+                        <span class="title is-3 has-text-text-80">r
+                            <span class="second-letter">W</span>
+                            <span class="atlist">atchlist</span>
+                            <span (click)="toggleDetail()" class="more-info-responsive ml-2 button has-background-black">?</span>
+                        </span>
+                        <span class="more-info ml-2 has-text-weight-bold">?</span>
+                        <span class="hide has-text-black is-size-7">A fan made utility for letterboxd users. Insert your username and will get a random film from your watchlist</span>
+                    </p>    
+                </div>         
             </div>
+            <div *ngIf="detail" (click)="toggleDetail()" class="cell is-col-start-2 is-col-span-7 hide-media">
+                <span class="has-text-black is-size-7">A fan made utility for letterboxd users. Insert your username and will get a random film from your watchlist</span>
+            </div>
+            
         </div>
     </div>
 </div>

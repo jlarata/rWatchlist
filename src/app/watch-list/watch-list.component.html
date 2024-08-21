@@ -12,8 +12,8 @@
                         <div class="form-container block">
                             <label class="label is-dark has-text-text-80" for="username">Enter your letterboxd username</label>
                             <input class="input" id="username" [(ngModel)]="username" placeholder="username">
-                            <div class="mt-1 has-text-text-80" *ngIf="username">
-                                Hi, {{username}}
+                            <div class="mt-1 has-text-warning-light has-text-weight-bold" *ngIf="username">
+                                Hi, {{username | uppercase}}
                             </div>
                             <button *ngIf="(isLoaded == false) && (isLoading == false) && (emptyWatchList == false)" class="button is-dark" type="button" (click)="getRandomFilm()">Pick a random movie for me please!</button>
                             <button *ngIf="isLoaded" class="button is-dark" type="button" (click)="getRandomFilm()">Pick again please!</button>
@@ -25,9 +25,10 @@
             <div class="cell is-col-start-5 is-col-span-4 is-row-start-4">
                 <app-loading-component *ngIf="(isLoading == true)"></app-loading-component>
                 <div class="">    
-                    <div *ngIf="isLoaded && (emptyWatchList == false)" class="randomFilmContainer">   
+                    <div *ngIf="isLoaded && (userExists == true)  && (emptyWatchList == false)" class="randomFilmContainer">   
                         <div class="title-container-b">
                             <span class="title is-4 has-text-text-80">{{randomFilm.name}}</span>
+                            <div *ngIf="randomFilm.name !== randomFilm.originalName" class="mt-2 has-text-text-70">({{randomFilm.originalName}})</div>
                         </div>
                         <a href="{{randomFilm.url}}" target="_blank">
                             <img ngSrc="{{randomFilm.poster}}" width="166" height="249" alt="{{randomFilm.name}} priority">
@@ -35,14 +36,16 @@
                         <p>It seems it's your turn to see <a href="{{randomFilm.url}}" target="_blank">{{randomFilm.name}}</a></p>
                         <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>
                     </div>
-                    <div *ngIf="isLoaded && (emptyWatchList == true)" class="fixed-grid has-2-cols">
-                        <div class="grid">    
-                            <div class="cell is-col">
-                                <div class="randomFilmContainer">
-                                    <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                        
-                                    <p>It seems thtat {{lastUsername}} has no films in the watchlist yet</p>        
-                                </div>
-                            </div>
+                    <div *ngIf="isLoaded && (userExists == true) && (emptyWatchList == true)" class="randomFilmContainer">
+                        <div class="title-container-c">
+                            <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                        
+                            <p>It seems that {{lastUsername}} has no films in the watchlist yet</p>        
+                        </div>
+                    </div>
+                    <div *ngIf="isLoaded && (userExists == false)" class="randomFilmContainer">
+                        <div class="title-container-c">
+                            <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                        
+                            <p>I'm sorry, i don't think the user {{lastUsername}} exists. </p>        
                         </div>
                     </div>
                 </div>

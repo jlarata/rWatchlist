@@ -26,7 +26,9 @@ export class WatchListComponent implements OnInit {
   //if is fetching for a new username, getRandomFilm() will set this on true. 
   //at the end of a successful fetch will set it false again
   isLoading = false;
-  //if the service detects the user exist but have no films in the watchlist:
+  //if the service detects there is no username this will be fetch true
+  userExists = true;
+  //if the service detects the user exist but have no films in the watchlist this will be fetch true:
   emptyWatchList = false;
 
   //general variables to be provided from the service
@@ -36,6 +38,7 @@ export class WatchListComponent implements OnInit {
   randomNumber: number = 0;
   randomFilm: Film = {
     name: '',
+    originalName: '',
     poster: '',
     url: ',',
     imgUrlContainer: ''
@@ -86,6 +89,7 @@ export class WatchListComponent implements OnInit {
       
       await this.watchlistService.scrapeData(this.username)
         .then((scrapedObject) => (
+          this.userExists = scrapedObject.userExists,
           this.lastUsername = this.username,
           this.emptyWatchList = scrapedObject.emptyWatchlist,
           this.randomFilm = scrapedObject.randomFilm,

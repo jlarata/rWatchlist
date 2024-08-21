@@ -24,16 +24,23 @@ export class WatchlistService {
   private targetUrl = "";
   private isSameUser = false;
   private emptyWatchlist = false;
-
+  
+  private  myBlob = new Blob();
+  private  myOptions = { status: 200, statusText: "SuperSmashingGreat!" };
+  private  myResponse = new Response(this.myBlob, this.myOptions);
+  
   private watchlist: Film[] = [];  
   private pages: string[] = [];
 
   private numFilms = 0;
   private randomNumber: number = 0;
-  private status = 'off'
+  private status = 'off';
+
+  private userExists = true;
   
   private randomFilm: Film = {
     name: '...',
+    originalName: '...',
     poster: '...',
     url: '...',
     imgUrlContainer: '...'
@@ -55,66 +62,100 @@ export class WatchlistService {
   scrapeData = async (username: string) => {
     console.log('scraping...')
     //1. create array of urls
-      await this.createArrayOfURLs(username);
-    //2. When array is ready, use that in a async-foreach-scraping function
-      if (this.emptyWatchlist === false) {
-      await this.populateWatchlist();
-
-      await this.pickRandomFilm(this.numFilms)
-    } else {
-      console.log('this user has no films in the watchlist')
-    }
+      this.myResponse = await this.checkUserExists(username);
+      
+      if (this.userExists) {
+        if (this.isSameUser == false)
+        {
+          await this.createArrayOfURLs(username);    
+        //2. When array is ready => async-foreach-scraping function
+          if (this.emptyWatchlist === false) {
+            await this.populateWatchlist();
+          } else {
+            console.log('this user has no films in the watchlist')
+          }
+        }
+        if (!this.emptyWatchlist){
+          await this.pickRandomFilm(this.numFilms);
+        }
+        
+        } else {
+      console.log('nonexistent username')
+      }
+    
     return {
       randomFilm: this.randomFilm,
       randomNumber: this.randomNumber,
       numFilms: this.numFilms,
-      emptyWatchlist: this.emptyWatchlist
+      emptyWatchlist: this.emptyWatchlist,
+      userExists: this.userExists
       }
       
   };
 
+  async checkUserExists(username: string) {
+    this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
+
+    if (this.username !== username){
+      //clear array because this method has ben previously called with another username
+      this.isSameUser = false;
+      this.pages = [];
+      this.username = username;
+      this.userExists = true;
+      let response = await fetch(this.targetUrl)
+      if (response.status === 404)
+      {
+       this.userExists = false;
+      } 
+      
+      
+      return response
+    
+    } else {
+      if (this.userExists = true) {
+        if (!this.emptyWatchlist){
+          console.log(`recycling url array for ${username}`)
+        }
+        this.isSameUser = true;
+        return this.myResponse
+      } else {
+        this.isSameUser = true;
+        return this.myResponse;
+      }
+      
+    }
+      
+  }
 
   async createArrayOfURLs(username: string) {
-    try {
-      if (this.username !== username)
-      {
-        console.log(`creating new array of urls for ${username}`)
-        //clear array in case this method has ben previously called with another username
-        this.pages = [];
-        this.username = username;
-        //this.targetUrl = 'https://cors-anywhere.herokuapp.com/https://letterboxd.com/'+this.username+'/watchlist/'
         this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
-        //this.targetUrl = '/api/'+this.username+'/watchlist/'
-        let response = await fetch(this.targetUrl);
-        let html = await response.text();
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-
-        if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]) !== 0) {
-          //console.log(Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]))
-          let numPages = this.calculatePages(doc);
-          let i = 1;
-            do {
-                this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
-                i++;
-            }
-            while (i <= numPages);
-          this.isSameUser = false;
-          this.emptyWatchlist = false;
-        }
-        else {
-          this.emptyWatchlist = true;
-        }
         
-      } else {
-        console.log(`recycling url array for ${username}`)
-        this.isSameUser = true;
-      }
-    
-    }
-    catch (error) {
-      console.log(error)
-    } //console.log(this.pages)    
+        try {
+          //let response = await fetch(this.targetUrl);
+          let html = await this.myResponse.text();
+          let parser = new DOMParser();
+          let doc = parser.parseFromString(html, "text/html");
+          if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]) !== 0)
+          {
+            console.log(`creating new array of urls for ${username}`)
+            let numPages = this.calculatePages(doc);
+            let i = 1;
+            do {
+                  this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
+                  i++;
+               }
+            while (i <= numPages);
+            this.isSameUser = false;
+            this.emptyWatchlist = false;
+            }
+            else {
+              this.emptyWatchlist = true;
+            }
+          }
+        
+        catch (error) {
+          console.log(error)
+        } //console.log(this.pages)  
   };
 
   calculatePages(doc: Document): number {
@@ -137,7 +178,8 @@ export class WatchlistService {
         await this.scrape(page)
         }
       } else {
-          console.log(`recycling ${this.username}'s watchlist`)
+        console.log(`recycling ${this.username}'s watchlist`)
+        
       }   
       //eliminated method: foreach doesnt have await/async support
       //    this.pages.forEach((page) => this.scrape(page))
@@ -160,6 +202,7 @@ export class WatchlistService {
       
           this.watchlist.push({
             name: title.getAttribute('alt') as string,
+            originalName: title.getAttribute('alt') as string,
             poster: 'not yet...',
             url: filmLink,
             imgUrlContainer: imgUrlContainer,
@@ -178,7 +221,24 @@ export class WatchlistService {
       this.randomNumber = Math.floor(Math.random() * numFilms-1);
       this.randomFilm = this.watchlist[this.randomNumber];
       //console.log(`It seems it's your turn to see ${this.randomFilm.name}, \n link: ${this.randomFilm.url} that's film # ${this.randomNumber+1} out of ${numFilms}`)
-  
+      
+
+      /*1. because letterboxed sometimes displays english name and other times displays
+      original name, below is the method to ensure both are fetched if exists*/
+      try {
+        let response = await fetch(this.proxy+this.randomFilm.url);
+        let html = await response.text();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
+        let j = doc.querySelector('h2.originalname')?.textContent;
+        if (j) {
+          this.randomFilm.originalName = j
+        }
+      }
+      catch (error) {
+        console.log(error)
+      }
+
       /* because of the very lazy loading, images cannot be fetched from original url
       as it turned out, images are fetched in a concatenated method. 
       below is the method to get them*/
