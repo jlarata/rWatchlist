@@ -106,25 +106,23 @@ export class WatchlistService {
       if (response.status === 404)
       {
        this.userExists = false;
+       console.log("turned false");
       } 
-      
-      
       return response
     
     } else {
-      if (this.userExists = true) {
+      if (this.userExists == true) {
         if (!this.emptyWatchlist){
           console.log(`recycling url array for ${username}`)
         }
         this.isSameUser = true;
         return this.myResponse
       } else {
+        console.log("user no exists!")
         this.isSameUser = true;
         return this.myResponse;
-      }
-      
-    }
-      
+      } 
+    } 
   }
 
   async createArrayOfURLs(username: string) {
