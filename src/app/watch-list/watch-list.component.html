@@ -28,7 +28,7 @@
                     <div *ngIf="isLoaded && (userExists == true)  && (emptyWatchList == false)" class="randomFilmContainer">   
                         <div class="title-container-b">
                             <span class="title is-4 has-text-text-80">{{randomFilm.name}}</span>
-                            <div *ngIf="randomFilm.name !== randomFilm.originalName" class="mt-2 has-text-text-70">({{randomFilm.originalName}})</div>
+                            <div *ngIf="randomFilm.name !== randomFilm.originalName" class="mt-2 is-italic has-text-text-70">({{randomFilm.originalName}})</div>
                         </div>
                         <a href="{{randomFilm.url}}" target="_blank">
                             <img ngSrc="{{randomFilm.poster}}" width="166" height="249" alt="{{randomFilm.name}} priority">
