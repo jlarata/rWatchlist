@@ -282,7 +282,7 @@ export class WatchlistService {
         let html = await response.text();
 
         if (html.includes(`<h2 class="originalname">`)) {
-          let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0]
+          let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
           this.randomFilm.originalName = originalTitle; 
         }
         

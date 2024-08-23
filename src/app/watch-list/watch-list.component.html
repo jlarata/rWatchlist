@@ -25,13 +25,13 @@
             <div class="cell is-col-start-5 is-col-span-4 is-row-start-4">
                 <app-loading-component *ngIf="(isLoading == true)"></app-loading-component>
                 <div class="">    
-                    <div *ngIf="isLoaded && (userExists == true)  && (emptyWatchList == false)" class="randomFilmContainer">   
+                    <div *ngIf="!isLoading && isLoaded && (userExists)  && (!emptyWatchList)" class="randomFilmContainer">   
                         <div class="title-container-b">
                             <span class="title is-4 has-text-text-80">{{randomFilm.name}}</span>
                             <div *ngIf="randomFilm.name !== randomFilm.originalName" class="mt-2 is-italic has-text-text-70">({{randomFilm.originalName}})</div>
                         </div>
                         <a href="{{randomFilm.url}}" target="_blank">
-                            <img id="poster" ngSrc="{{randomFilm.poster}}" width="166" height="249" alt="{{randomFilm.name}} priority">
+                            <img ngSrc="{{randomFilm.poster}}" width="166" height="249">
                         </a>                    
                         <p>It seems it's your turn to see <a href="{{randomFilm.url}}" target="_blank">{{randomFilm.name}}</a></p>
                         <p>(that's film # {{randomNumber+1}} out of {{numFilms}})</p>

@@ -86,6 +86,7 @@ export class WatchListComponent implements OnInit {
     { 
       this.isLoading = true;
       this.isLoaded = false;
+      this.randomFilm.poster = ".\assets\img\phold.png"
       
       await this.watchlistService.scrapeData(this.username)
         .then((scrapedObject) => (
