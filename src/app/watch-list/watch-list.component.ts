@@ -79,13 +79,13 @@ export class WatchListComponent implements OnInit {
     }
     
   async getRandomFilm() {
-    if (this.username && this.username != '')
+    /**must have text in input field
+     * text must not be null or undefined
+     * has to wait last film load */
+    if (this.username && this.username != '' && !this.isLoading)
     { 
-      if (this.lastUsername !== this.username)
-      {
-        this.isLoading = true;
-        this.isLoaded = false;
-      }
+      this.isLoading = true;
+      this.isLoaded = false;
       
       await this.watchlistService.scrapeData(this.username)
         .then((scrapedObject) => (

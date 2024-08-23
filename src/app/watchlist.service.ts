@@ -280,12 +280,20 @@ export class WatchlistService {
       try {
         let response = await fetch(this.proxy+this.randomFilm.url);
         let html = await response.text();
+
+        if (html.includes(`<h2 class="originalname">`)) {
+          let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0]
+          this.randomFilm.originalName = originalTitle; 
+        }
+        
+        /** old method to get the original name. new one is more efficient
         let parser = new DOMParser();
         let doc = parser.parseFromString(html, "text/html");
         let j = doc.querySelector('h2.originalname')?.textContent;
         if (j) {
           this.randomFilm.originalName = j
-        }
+        } 
+        */
       }
       catch (error) {
         console.log(error)
@@ -296,11 +304,16 @@ export class WatchlistService {
       try {
         let response = await fetch(this.randomFilm.imgUrlContainer);
         let html = await response.text();
+
+        let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
+        this.randomFilm.poster = posterUrl;
+        
+        /** as with the original name method.
         let parser = new DOMParser();
         let doc = parser.parseFromString(html, "text/html");
         let i = doc.querySelector('img');
-
         this.randomFilm.poster = (i?.getAttribute('src') as string).replace("125-0-187", "460-0-690");
+        */
       }
       catch (error) {
         console.log(error)
