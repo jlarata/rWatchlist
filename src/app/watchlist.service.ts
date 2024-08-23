@@ -89,7 +89,13 @@ export class WatchlistService {
           } else {
             /** case Z) user exists but has no films */
             console.log('this user has no films in the watchlist')
+          } 
+          /** 4. as long as it has films in the watchlist: pick a random film */
+          if (!this.emptyWatchlist){
+            await this.pickRandomFilm(this.numFilms);
           }
+
+
         } else {
           /** case: same user that in the inmediately previous search:
            * so there is no need for new URL array or repopulate watchlist[] */
@@ -102,10 +108,7 @@ export class WatchlistService {
           }
         }
 
-        /** 4. as long as it has films in the watchlist: pick a random film */
-        if (!this.emptyWatchlist){
-          await this.pickRandomFilm(this.numFilms);
-        }
+        
 
       } else {
         /** case Y) checkUserExists() returned 404 so this.userExists was set false*/
@@ -264,9 +267,9 @@ export class WatchlistService {
    * choose a randomFilm from the watchlist[]
    * will be called only if userExists && !emptyWatchlist 
    * will fetch 2 strings film-specific: original name (if exists) and poster url. See below
-   */
+   */  
   async pickRandomFilm(numFilms: number): Promise<Film>  {
-      this.randomNumber = Math.floor(Math.random() * numFilms-1);
+      this.randomNumber = this.getRandomInteger(1, numFilms) ;
       this.randomFilm = this.watchlist[this.randomNumber];
 
       /** ltbxd sometimes displays title in english and some times displays 
@@ -304,5 +307,11 @@ export class WatchlistService {
       }
       return this.randomFilm;
         
+    }
+    getRandomInteger = (min: number, max: number) => {
+      min = Math.ceil(min)
+      max = Math.floor(max)
+    
+      return Math.floor(Math.random() * (max - min)) + min
     }
   }
