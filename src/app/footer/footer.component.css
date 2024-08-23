@@ -1,21 +1,18 @@
-.footer {
-    position:relative;
-    bottom: 0;
-    right: 0;
-    /*border: solid 1px red;*/
-}
+
 
 .by {
     position:absolute;
+    bottom: 0; 
     right: 0;
     padding: 1rem;
-    /*border: solid 1px white;*/
 }
 
 
-@media screen and (min-width: 576px) {
+/*@media screen and (min-width: 576px) {
     .by {
         bottom: 0;
     }
-  }
+  }*/
+
+  
   

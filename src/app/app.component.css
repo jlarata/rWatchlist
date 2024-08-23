@@ -1,0 +1,16 @@
+.footer {
+    background-color: rgba(0, 0, 0, 0);
+    position: fixed;
+    width: 15rem;
+    bottom: 0;
+    right: 0;
+    /*border: solid 1px red;*/
+}
+
+@media screen and (max-width: 576px) {
+    .footer {
+        position: fixed;
+        display: inline-block;
+        height: 20px;
+    }
+}
