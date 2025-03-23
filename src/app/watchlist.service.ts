@@ -15,7 +15,8 @@ export class WatchlistService {
 
   /*proxy server to elude CORS
   proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/ 
-  private proxy = 'https://apricot-mixed-ixora.glitch.me/'
+  //private proxy = 'https://apricot-mixed-ixora.glitch.me/'
+  private proxy = 'https://spot-alert-gander.glitch.me/'
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
   
@@ -72,8 +73,9 @@ export class WatchlistService {
      * but, in order to check existence, a fetch() is needed. so, although contrary to clean code
      * ideas, it seemed more efficient to keep the data fetched and use it in the next step.
      * that's the reason myResponse is a Response already initialized: now, provided that user
-     * exists, myResponse will store de data fetched, so it can be called an used in the next method.*/
+     * exists, myResponse will store the data fetched, so it can be called an used in the next method.*/
       this.myResponse = await this.checkUserExists(username);
+      //console.log(this.myResponse)
       
       /**then, if user exists... */
       if (this.userExists) {
@@ -133,14 +135,30 @@ export class WatchlistService {
    * 3) if (!1 &&  2) : and returns response with targetUrl-fetch() data */
 
   async checkUserExists(username: string) {
-    this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
+    //this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
+    this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';  
+
     if (this.username !== username){
       /** clear array because this method has ben previously called with another username */
       this.isSameUser = false;
       this.pages = [];
       this.username = username;
       this.userExists = true;
-      let response = await fetch(this.targetUrl)
+      console.log("por chequear, ",this.targetUrl)
+
+      let response = await fetch(this.watchlistUrl+username+'/watchlist/',
+        {
+        /*headers: {
+          "Content-Type": "application/json",
+        },
+        mode: 'cors'
+        }*/} 
+       )
+      console.log(response)
+      /* if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      } */
+  
       if (response.status === 404)
       {
        this.userExists = false;

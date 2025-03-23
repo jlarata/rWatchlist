@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoadingSiteComponent } from '../loading-site/loading-site.component';
 import { WatchlistService } from '../watchlist.service';
 import { Film } from '../film';
-import { NgFor, NgIf, NgOptimizedImage, UpperCasePipe } from '@angular/common';
+import { NgIf, NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fromEvent } from 'rxjs';
 import { LoadingComponentComponent } from "../loading-component/loading-component.component";
@@ -10,7 +10,7 @@ import { LoadingComponentComponent } from "../loading-component/loading-componen
 @Component({
   selector: 'app-watch-list',
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule, UpperCasePipe, LoadingSiteComponent, NgOptimizedImage, LoadingComponentComponent],
+  imports: [NgIf, FormsModule, UpperCasePipe, LoadingSiteComponent, NgOptimizedImage, LoadingComponentComponent],
   templateUrl: './watch-list.component.html',
   styleUrl: './watch-list.component.css'
 })
