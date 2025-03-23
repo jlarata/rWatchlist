@@ -146,7 +146,7 @@ export class WatchlistService {
       this.userExists = true;
       console.log("por chequear, ",this.targetUrl)
 
-      let response = await fetch(this.watchlistUrl+username+'/watchlist/',
+      let response = await fetch(this.targetUrl,
         {
         /*headers: {
           "Content-Type": "application/json",
