@@ -24,7 +24,8 @@
 
             <div class="cell is-col-start-5 is-col-span-4 is-row-start-4">
                 <app-loading-component *ngIf="(isLoading == true)"></app-loading-component>
-                <div class="">    
+                
+                <div *ngIf="!chromeIsFuckingUs">
                     <div *ngIf="!isLoading && isLoaded && (userExists)  && (!emptyWatchList)" class="randomFilmContainer">   
                         <div class="title-container-b">
                             <span class="title is-4 has-text-text-80">{{randomFilm.name}}</span>
@@ -49,6 +50,16 @@
                         </div>
                     </div>
                 </div>
+                <div *ngIf="chromeIsFuckingUs">
+                    <div *ngIf="isLoaded" class="randomFilmContainer">
+                        <div class="title-container-c">
+                            <img src=".\assets\img\logo.png" width="64" height="64" alt="uops!">                        
+                            <p>I'm sorry {{lastUsername}} but we have an error probably because of google chrome dumb CORS policies. Please try with another navigator? </p>        
+                        </div>
+                    </div>
+                </div>
+
+                
             </div>
         </div>
     </div>

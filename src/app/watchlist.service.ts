@@ -9,25 +9,26 @@ export class WatchlistService {
 
 
   /*service will remember this string and compare to "username" parameter to verify 
-  if its repeating the las search*/ 
+  if its repeating the las search*/
   private username: string = ''
   private isSameUser = false;
 
   /*proxy server to elude CORS
-  proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/ 
+  proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/
   //private proxy = 'https://apricot-mixed-ixora.glitch.me/'
   private proxy = 'https://spot-alert-gander.glitch.me/'
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
-  
+  private chromeIsFuckingUs = false;
+
   /* mock Response is inicialized to leverage benefits of checkUserExists method. see below */
-  private  myBlob = new Blob();
-  private  myOptions = { status: 200, statusText: "SuperSmashingGreat!" };
-  private  myResponse = new Response(this.myBlob, this.myOptions);
-  
+  private myBlob = new Blob();
+  private myOptions = { status: 200, statusText: "SuperSmashingGreat!" };
+  private myResponse = new Response(this.myBlob, this.myOptions);
+
 
   /********   useful variables   ********/
-  private watchlist: Film[] = [];  
+  private watchlist: Film[] = [];
   private pages: string[] = [];
   /**************************************/
 
@@ -37,7 +38,7 @@ export class WatchlistService {
 
   /**scrapeData():**/
   private numFilms = 0;
-  private randomNumber = 0;  
+  private randomNumber = 0;
   private userExists = true;
   private randomFilm: Film = {
     name: '...',
@@ -47,7 +48,7 @@ export class WatchlistService {
     imgUrlContainer: '...'
   }
   /** case user exists but the watchlist is empty, the service will set this true **/
-  private emptyWatchlist = false; 
+  private emptyWatchlist = false;
   /**************************************/
 
 
@@ -62,9 +63,9 @@ export class WatchlistService {
         this.status = 'off';
       }
     });
-    return this.status;   
+    return this.status;
   }
- 
+
   /** main function */
   scrapeData = async (username: string) => {
     console.log('scraping process iniciated')
@@ -74,16 +75,18 @@ export class WatchlistService {
      * ideas, it seemed more efficient to keep the data fetched and use it in the next step.
      * that's the reason myResponse is a Response already initialized: now, provided that user
      * exists, myResponse will store the data fetched, so it can be called an used in the next method.*/
-      this.myResponse = await this.checkUserExists(username);
-      //console.log(this.myResponse)
-      
+    this.myResponse = await this.checkUserExists(username);
+
+    if (this.chromeIsFuckingUs) {
+      console.log('chrome CORS policy is idiotic')
+    } else {
+
       /**then, if user exists... */
       if (this.userExists) {
         /**and if not repeating same user that in the inmediately previous search*/
-        if (!this.isSameUser)
-        {
+        if (!this.isSameUser) {
           /** 2. create array of urls. this method also sets emptywatchlist true or false */
-          await this.createArrayOfURLs(username);    
+          await this.createArrayOfURLs(username);
           /** and, in case user doesn't have an empty watchlist in ltrbxd... */
           if (!this.emptyWatchlist) {
             /** 3. use the URL array to perform an async-for-loop-scraping function */
@@ -91,9 +94,9 @@ export class WatchlistService {
           } else {
             /** case Z) user exists but has no films */
             console.log('this user has no films in the watchlist')
-          } 
+          }
           /** 4. as long as it has films in the watchlist: pick a random film */
-          if (!this.emptyWatchlist){
+          if (!this.emptyWatchlist) {
             await this.pickRandomFilm(this.numFilms);
           }
 
@@ -101,7 +104,7 @@ export class WatchlistService {
         } else {
           /** case: same user that in the inmediately previous search:
            * so there is no need for new URL array or repopulate watchlist[] */
-          if (!this.emptyWatchlist){
+          if (!this.emptyWatchlist) {
             /** as long as it have films in the watchlist: pick a random film */
             await this.pickRandomFilm(this.numFilms);
           } else {
@@ -110,13 +113,15 @@ export class WatchlistService {
           }
         }
 
-        
-
       } else {
         /** case Y) checkUserExists() returned 404 so this.userExists was set false*/
         console.log('nonexistent username')
       }
-    
+
+    }
+
+
+
     /** 5. return. if case Z) or case Y), most of these will return as inicialized "..." strings
      * the booleans emptyWatchlist and userExists will be the relevant information for the component. */
     return {
@@ -124,9 +129,10 @@ export class WatchlistService {
       randomNumber: this.randomNumber,
       numFilms: this.numFilms,
       emptyWatchlist: this.emptyWatchlist,
-      userExists: this.userExists
-      }
-      
+      userExists: this.userExists,
+      chromeIsFuckingUs: this.chromeIsFuckingUs
+    }
+
   };
 
   /** first method:
@@ -136,38 +142,39 @@ export class WatchlistService {
 
   async checkUserExists(username: string) {
     //this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
-    this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';  
+    this.targetUrl = this.proxy + this.watchlistUrl + username + '/watchlist/';
 
-    if (this.username !== username){
+    if (this.username !== username) {
       /** clear array because this method has ben previously called with another username */
       this.isSameUser = false;
       this.pages = [];
       this.username = username;
       this.userExists = true;
-      console.log("por chequear, ",this.targetUrl)
+      this.chromeIsFuckingUs = false;
+      console.log("por chequear, ", this.targetUrl)
 
       let response = await fetch(this.targetUrl,
-        {
-        /*headers: {
-          "Content-Type": "application/json",
+        /*{
+        headers: {
+          "Access-Control-Request-Private-Network" : "false",
         },
-        mode: 'cors'
-        }*/} 
-       )
-      console.log(response)
-      /* if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-      } */
-  
-      if (response.status === 404)
-      {
-       this.userExists = false;
-      } 
+        }*/
+      )
+      //console.log(response)
+      if (response.status === 503) {
+        this.chromeIsFuckingUs = true
+        //        throw new Error(`Response status: ${response.status}`);
+        return response
+      }
+
+      if (response.status === 404) {
+        this.userExists = false;
+      }
       return response
-    
+
     } else {
       if (this.userExists) {
-        if (!this.emptyWatchlist){
+        if (!this.emptyWatchlist) {
           console.log(`recycling url array for ${username}`)
         }
         this.isSameUser = true;
@@ -175,8 +182,8 @@ export class WatchlistService {
       } else {
         this.isSameUser = true;
         return this.myResponse;
-      } 
-    } 
+      }
+    }
   }
 
   /** second method:
@@ -187,47 +194,46 @@ export class WatchlistService {
    * the correct amount of elements in the URL array  
    */
   async createArrayOfURLs(username: string) {
-        this.targetUrl = this.proxy+this.watchlistUrl+this.username+'/watchlist/'
-        try {
-          //let response = await fetch(this.targetUrl);
-          let html = await this.myResponse.text();
-          let parser = new DOMParser();
-          let doc = parser.parseFromString(html, "text/html");
-          if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray) [0]) !== 0)
-          {
-            console.log(`creating new array of urls for ${username}`)
-            let numPages = this.calculatePages(doc);
-            let i = 1;
-            do {
-                  this.pages.push(this.targetUrl + "page/" + i.toString() +"/")
-                  i++;
-               }
-            while (i <= numPages);
-
-            //restart variables for next search
-            this.isSameUser = false;
-            this.emptyWatchlist = false;
-          } else {
-            this.emptyWatchlist = true;
-          }
+    this.targetUrl = this.proxy + this.watchlistUrl + this.username + '/watchlist/'
+    try {
+      //let response = await fetch(this.targetUrl);
+      let html = await this.myResponse.text();
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, "text/html");
+      if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray)[0]) !== 0) {
+        console.log(`creating new array of urls for ${username}`)
+        let numPages = this.calculatePages(doc);
+        let i = 1;
+        do {
+          this.pages.push(this.targetUrl + "page/" + i.toString() + "/")
+          i++;
         }
-        catch (error) {
-          console.log(error)
-        }  
+        while (i <= numPages);
+
+        //restart variables for next search
+        this.isSameUser = false;
+        this.emptyWatchlist = false;
+      } else {
+        this.emptyWatchlist = true;
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }
   };
 
   /** aid method called from createArrayOfURLs() */
   calculatePages(doc: Document): number {
-      let numPages: number = 1;  
-      let cantPelisElement: Element = doc.querySelector('span.js-watchlist-count') as Element;
-      if (cantPelisElement && cantPelisElement.textContent) {
-        let textContent = cantPelisElement.textContent;
-        let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
-        numPages = Math.ceil(cantPelis/28);      
-        }
+    let numPages: number = 1;
+    let cantPelisElement: Element = doc.querySelector('span.js-watchlist-count') as Element;
+    if (cantPelisElement && cantPelisElement.textContent) {
+      let textContent = cantPelisElement.textContent;
+      let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
+      numPages = Math.ceil(cantPelis / 28);
+    }
     return numPages;
   };
-  
+
   /** third method:
    * will be called only if created a new array of urls
    * (that is: userExists && !emptyWatchlist && !isSameUser ) 
@@ -235,114 +241,114 @@ export class WatchlistService {
   populateWatchlist = async () => {
     this.watchlist = [];
     this.numFilms = 0;
-    console.log(`populating watchlist array for ${this.username}`)      
+    console.log(`populating watchlist array for ${this.username}`)
     for (let page of this.pages) {
       await this.scrape(page)
-      }  
-      //eliminated method: foreach doesnt have await/async support
-      //    this.pages.forEach((page) => this.scrape(page))
-    };  
-  
+    }
+    //eliminated method: foreach doesnt have await/async support
+    //    this.pages.forEach((page) => this.scrape(page))
+  };
+
   async scrape(page: string) {
-    try {       
+    try {
+
+      let response = await fetch(page, { method: "POST" });
+      let html = await response.text();
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, "text/html");
+      let a = doc.querySelectorAll('ul.poster-list > li > div > img');
+
+      a.forEach((title) => {
+        this.numFilms++;
+
+        /** specific url for each movie and for each movie poster 
+         * (those are 2 different links because of images-lazy-loading. see below)
          
-        let response = await fetch(page, { method: "POST"});
-        let html = await response.text();
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-        let a = doc.querySelectorAll('ul.poster-list > li > div > img');
-      
-        a.forEach((title) => {
-          this.numFilms ++;
+         * worth of notice: the method will not scrap each poster for it would slow down
+         * since each poster would have to be fetched from a new url.
+         * so at this point "poster" attribute will be "not yet..." string  */
 
-          /** specific url for each movie and for each movie poster 
-           * (those are 2 different links because of images-lazy-loading. see below)
-           
-           * worth of notice: the method will not scrap each poster for it would slow down
-           * since each poster would have to be fetched from a new url.
-           * so at this point "poster" attribute will be "not yet..." string  */
+        let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
 
-          let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
-          
-          let filmLink = 'https://letterboxd.com'+specUrl;
-          let imgUrlContainer = this.proxy+'https://letterboxd.com/ajax/poster'+specUrl+'std/125x187/'
-      
-          this.watchlist.push({
-            name: title.getAttribute('alt') as string,
-            originalName: title.getAttribute('alt') as string,
-            poster: 'not yet...',
-            url: filmLink,
-            imgUrlContainer: imgUrlContainer,
-            })
-          })   
-      }
+        let filmLink = 'https://letterboxd.com' + specUrl;
+        let imgUrlContainer = this.proxy + 'https://letterboxd.com/ajax/poster' + specUrl + 'std/125x187/'
+
+        this.watchlist.push({
+          name: title.getAttribute('alt') as string,
+          originalName: title.getAttribute('alt') as string,
+          poster: 'not yet...',
+          url: filmLink,
+          imgUrlContainer: imgUrlContainer,
+        })
+      })
+    }
     catch (error) {
       console.log(error)
-    }  
+    }
   }
-  
+
   /** fourth method
    * choose a randomFilm from the watchlist[]
    * will be called only if userExists && !emptyWatchlist 
    * will fetch 2 strings film-specific: original name (if exists) and poster url. See below
-   */  
-  async pickRandomFilm(numFilms: number): Promise<Film>  {
-      this.randomNumber = this.getRandomInteger(1, numFilms) ;
-      this.randomFilm = this.watchlist[this.randomNumber];
+   */
+  async pickRandomFilm(numFilms: number): Promise<Film> {
+    this.randomNumber = this.getRandomInteger(1, numFilms);
+    this.randomFilm = this.watchlist[this.randomNumber];
 
-      /** ltbxd sometimes displays title in english and some times displays 
-       * the original name, below is the method to ensure both are fetched if exists 
-       * case not: originalName was inicialized same as name in the previous method
-       * the component will check if name !== originalName to know if there is, in fact, an originalName */
-      
-      try {
-        let response = await fetch(this.proxy+this.randomFilm.url);
-        let html = await response.text();
+    /** ltbxd sometimes displays title in english and some times displays 
+     * the original name, below is the method to ensure both are fetched if exists 
+     * case not: originalName was inicialized same as name in the previous method
+     * the component will check if name !== originalName to know if there is, in fact, an originalName */
 
-        if (html.includes(`<h2 class="originalname">`)) {
-          let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
-          this.randomFilm.originalName = originalTitle; 
-        }
-        
-        /** old method to get the original name. new one is more efficient
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-        let j = doc.querySelector('h2.originalname')?.textContent;
-        if (j) {
-          this.randomFilm.originalName = j
-        } 
-        */
-      }
-      catch (error) {
-        console.log(error)
-      }
-      
-      /** because of the type of lazy loading, image urls wont be at the first url fetched
-       *  so image urls are fetched in this concatenated method. */
-      try {
-        let response = await fetch(this.randomFilm.imgUrlContainer);
-        let html = await response.text();
+    try {
+      let response = await fetch(this.proxy + this.randomFilm.url);
+      let html = await response.text();
 
-        let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
-        this.randomFilm.poster = posterUrl;
-        
-        /** as with the original name method.
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-        let i = doc.querySelector('img');
-        this.randomFilm.poster = (i?.getAttribute('src') as string).replace("125-0-187", "460-0-690");
-        */
+      if (html.includes(`<h2 class="originalname">`)) {
+        let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
+        this.randomFilm.originalName = originalTitle;
       }
-      catch (error) {
-        console.log(error)
-      }
-      return this.randomFilm;
-        
+
+      /** old method to get the original name. new one is more efficient
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, "text/html");
+      let j = doc.querySelector('h2.originalname')?.textContent;
+      if (j) {
+        this.randomFilm.originalName = j
+      } 
+      */
     }
-    getRandomInteger = (min: number, max: number) => {
-      min = Math.ceil(min)
-      max = Math.floor(max)
-    
-      return Math.floor(Math.random() * (max - min)) + min
+    catch (error) {
+      console.log(error)
     }
+
+    /** because of the type of lazy loading, image urls wont be at the first url fetched
+     *  so image urls are fetched in this concatenated method. */
+    try {
+      let response = await fetch(this.randomFilm.imgUrlContainer);
+      let html = await response.text();
+
+      let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
+      this.randomFilm.poster = posterUrl;
+
+      /** as with the original name method.
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, "text/html");
+      let i = doc.querySelector('img');
+      this.randomFilm.poster = (i?.getAttribute('src') as string).replace("125-0-187", "460-0-690");
+      */
+    }
+    catch (error) {
+      console.log(error)
+    }
+    return this.randomFilm;
+
   }
+  getRandomInteger = (min: number, max: number) => {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+
+    return Math.floor(Math.random() * (max - min)) + min
+  }
+}

@@ -26,6 +26,8 @@ export class WatchListComponent implements OnInit {
   //if is fetching for a new username, getRandomFilm() will set this on true. 
   //at the end of a successful fetch will set it false again
   isLoading = false;
+  //are chrome stupid CORS policies stoppíng this app functionality?
+  chromeIsFuckingUs = false;
   //if the service detects there is no username this will be fetch true
   userExists = true;
   //if the service detects the user exist but have no films in the watchlist this will be fetch true:
@@ -90,6 +92,7 @@ export class WatchListComponent implements OnInit {
       
       await this.watchlistService.scrapeData(this.username)
         .then((scrapedObject) => (
+          this.chromeIsFuckingUs = scrapedObject.chromeIsFuckingUs,
           this.userExists = scrapedObject.userExists,
           this.lastUsername = this.username,
           this.emptyWatchList = scrapedObject.emptyWatchlist,
