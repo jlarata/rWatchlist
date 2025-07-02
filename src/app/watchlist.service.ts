@@ -17,7 +17,8 @@ export class WatchlistService {
   proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/
   //private proxy = 'https://apricot-mixed-ixora.glitch.me/'
   //private proxy = 'https://spot-alert-gander.glitch.me/'
-  private proxy = 'https://api.cors.lol/?url='
+  //private proxy = 'https://api.cors.lol/?url='
+  private proxy = 'https://api.codetabs.com/v1/proxy?quest='
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
   private chromeIsFuckingUs = false;
@@ -55,7 +56,7 @@ export class WatchlistService {
 
   /** the CORS Proxy is deployed in a free host. this method wakes it up. */
   wakeTheFake = async () => {
-    
+
     //puenteando el despertador
     /* const myRequest = new Request(this.proxy);
     await fetch(myRequest).then((response) => {
@@ -79,6 +80,8 @@ export class WatchlistService {
      * ideas, it seemed more efficient to keep the data fetched and use it in the next step.
      * that's the reason myResponse is a Response already initialized: now, provided that user
      * exists, myResponse will store the data fetched, so it can be called an used in the next method.*/
+    
+    //await this.sleep(45000)
     this.myResponse = await this.checkUserExists(username);
 
     if (this.chromeIsFuckingUs) {
@@ -155,19 +158,18 @@ export class WatchlistService {
       this.username = username;
       this.userExists = true;
       this.chromeIsFuckingUs = false;
-      console.log("por chequear, ", this.targetUrl)
-
+      //console.log("about to check url: ", this.targetUrl)
+      
+      console.log('checking if the user exists...')
       let response = await fetch(this.targetUrl,
         /*{
         headers: {
           "Access-Control-Request-Private-Network" : "false",
         },
         }*/
-        { headers: {
-          "Access-Control-Allow-Origin" : "True",
-        },}
       )
-      //console.log(response)
+      console.log('done ',response)
+      
       if (response.status === 503) {
         this.chromeIsFuckingUs = true
         //        throw new Error(`Response status: ${response.status}`);
@@ -252,6 +254,7 @@ export class WatchlistService {
     for (let page of this.pages) {
       await this.scrape(page)
     }
+    console.log('done. this is the watchlist: ',this.watchlist)
     //eliminated method: foreach doesnt have await/async support
     //    this.pages.forEach((page) => this.scrape(page))
   };
@@ -300,8 +303,10 @@ export class WatchlistService {
    * will fetch 2 strings film-specific: original name (if exists) and poster url. See below
    */
   async pickRandomFilm(numFilms: number): Promise<Film> {
+    console.log('picking a random film...')
     this.randomNumber = this.getRandomInteger(1, numFilms);
     this.randomFilm = this.watchlist[this.randomNumber];
+    console.log('random film picked: ', this.randomFilm.originalName)
 
     /** ltbxd sometimes displays title in english and some times displays 
      * the original name, below is the method to ensure both are fetched if exists 
@@ -309,6 +314,8 @@ export class WatchlistService {
      * the component will check if name !== originalName to know if there is, in fact, an originalName */
 
     try {
+      await this.sleep(10000);
+      console.log('searching for the original name...')
       let response = await fetch(this.proxy + this.randomFilm.url);
       let html = await response.text();
 
@@ -316,6 +323,7 @@ export class WatchlistService {
         let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
         this.randomFilm.originalName = originalTitle;
       }
+      console.log('...done. original name: ', this.randomFilm.originalName)
 
       /** old method to get the original name. new one is more efficient
       let parser = new DOMParser();
@@ -333,8 +341,12 @@ export class WatchlistService {
     /** because of the type of lazy loading, image urls wont be at the first url fetched
      *  so image urls are fetched in this concatenated method. */
     try {
+      await this.sleep(60000);
+      console.log('fetching the url with the poster')
       let response = await fetch(this.randomFilm.imgUrlContainer);
+      console.log('done, fetch results: ', response)
       let html = await response.text();
+      console.log(html)
 
       let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
       this.randomFilm.poster = posterUrl;
@@ -358,4 +370,10 @@ export class WatchlistService {
 
     return Math.floor(Math.random() * (max - min)) + min
   }
+
+  sleep(ms: number): Promise<void> {
+    console.log('very tired, sleeping for '+ms/1000+' seconds')
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 }
