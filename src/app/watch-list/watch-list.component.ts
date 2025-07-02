@@ -47,7 +47,10 @@ export class WatchListComponent implements OnInit {
   }
 
   constructor (private watchlistService: WatchlistService, private loadingSiteComponent: LoadingSiteComponent) {
-    this.loadingSiteComponent.setIntervalForRandomMessage()
+    this.loadingSiteComponent.setIntervalForRandomMessage(),
+    //puenteando el despertador.
+    this.loadingSiteComponent.clearIntervalForRandomMessage()
+    this.isOnline = 'on'
   }
  
   //if a key is pressed...
@@ -72,12 +75,14 @@ export class WatchListComponent implements OnInit {
   async ngOnInit() {
     //the CORS Proxy is mounted in a free host. so this method ask the service to wakes it up.
     //in the meantime loadingSiteComponent is trying to entertain user.
-    await this.watchlistService.wakeTheFake()
+    
+    //puenteando el despertador.
+    /* await this.watchlistService.wakeTheFake()
     .then((status) => (
       this.isOnline = status,
       //stops the loadingSiteComponent from keep switching random messages
       this.loadingSiteComponent.clearIntervalForRandomMessage()
-      ))
+      )) */
     }
     
   async getRandomFilm() {

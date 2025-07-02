@@ -16,7 +16,8 @@ export class WatchlistService {
   /*proxy server to elude CORS
   proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/
   //private proxy = 'https://apricot-mixed-ixora.glitch.me/'
-  private proxy = 'https://spot-alert-gander.glitch.me/'
+  //private proxy = 'https://spot-alert-gander.glitch.me/'
+  private proxy = 'https://api.cors.lol/?url='
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
   private chromeIsFuckingUs = false;
@@ -54,7 +55,9 @@ export class WatchlistService {
 
   /** the CORS Proxy is deployed in a free host. this method wakes it up. */
   wakeTheFake = async () => {
-    const myRequest = new Request(this.proxy);
+    
+    //puenteando el despertador
+    /* const myRequest = new Request(this.proxy);
     await fetch(myRequest).then((response) => {
       //console.log("ping: ", response.status)
       if (response.status == 200) {
@@ -63,7 +66,8 @@ export class WatchlistService {
         this.status = 'off';
       }
     });
-    return this.status;
+    return this.status; */
+    return 'on'
   }
 
   /** main function */
@@ -159,6 +163,9 @@ export class WatchlistService {
           "Access-Control-Request-Private-Network" : "false",
         },
         }*/
+        { headers: {
+          "Access-Control-Allow-Origin" : "True",
+        },}
       )
       //console.log(response)
       if (response.status === 503) {
