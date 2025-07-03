@@ -158,16 +158,11 @@ export class WatchlistService {
       this.username = username;
       this.userExists = true;
       this.chromeIsFuckingUs = false;
-      //console.log("about to check url: ", this.targetUrl)
-      
+      //console.log("about to check url: ", this.targetUrl) 
       console.log('checking if the user exists...')
-      let response = await fetch(this.targetUrl,
-        /*{
-        headers: {
-          "Access-Control-Request-Private-Network" : "false",
-        },
-        }*/
-      )
+      //let response = await fetch(this.targetUrl)
+      let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.targetUrl}/watchlist`)
+
       console.log('done ',response)
       
       if (response.status === 503) {
