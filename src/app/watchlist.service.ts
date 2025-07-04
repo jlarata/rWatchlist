@@ -1,24 +1,22 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Film } from './film';
+import { HttpClient } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class WatchlistService {
-
+  /*using http instead of fetch because the API always returns pure string, so sometimes
+  have to deal with them. the fetch method assume the response is a Response. sometimes it
+  is possible to override the problem just using response.toText(). sometimes not. */
+  private http = inject(HttpClient); //
 
   /*service will remember this string and compare to "username" parameter to verify 
   if its repeating the las search*/
   private username: string = ''
   private isSameUser = false;
-
-  /*proxy server to elude CORS
-  proxy + watchlistUrl + user (+ hardcoded string) will be used to initialize the targetUrl*/
-  //private proxy = 'https://apricot-mixed-ixora.glitch.me/'
-  //private proxy = 'https://spot-alert-gander.glitch.me/'
-  //private proxy = 'https://api.cors.lol/?url='
-  private proxy = 'https://api.codetabs.com/v1/proxy?quest='
   private watchlistUrl = 'https://letterboxd.com/'
   private targetUrl = "";
   private chromeIsFuckingUs = false;
@@ -27,9 +25,6 @@ export class WatchlistService {
   private myBlob = new Blob();
   private myOptions = { status: 200, statusText: "SuperSmashingGreat!" };
   private myResponse = new Response(this.myBlob, this.myOptions);
-  private myResponseString = ''
-
-
 
   /********   useful variables   ********/
   private watchlist: Film[] = [];
@@ -55,24 +50,7 @@ export class WatchlistService {
   private emptyWatchlist = false;
   /**************************************/
 
-
-  /** the CORS Proxy is deployed in a free host. this method wakes it up. */
-  wakeTheFake = async () => {
-
-    //puenteando el despertador
-    /* const myRequest = new Request(this.proxy);
-    await fetch(myRequest).then((response) => {
-      //console.log("ping: ", response.status)
-      if (response.status == 200) {
-        this.status = 'on';
-      } else {
-        this.status = 'off';
-      }
-    });
-    return this.status; */
-    return 'on'
-  }
-
+  
   /** main function */
   scrapeData = async (username: string) => {
     console.log('scraping process iniciated')
@@ -82,10 +60,9 @@ export class WatchlistService {
      * ideas, it seemed more efficient to keep the data fetched and use it in the next step.
      * that's the reason myResponse is a Response already initialized: now, provided that user
      * exists, myResponse will store the data fetched, so it can be called an used in the next method.*/
-    
-    //await this.sleep(45000)
+
     this.myResponse = await this.checkUserExists(username);
-    
+
     //this.myResponseString = await this.checkUserExists(username);
 
     if (this.chromeIsFuckingUs) {
@@ -152,9 +129,7 @@ export class WatchlistService {
    * 3) if (!1 &&  2) : and returns response with targetUrl-fetch() data */
 
   async checkUserExists(username: string) {
-    //this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
     this.targetUrl = this.watchlistUrl + username + '/watchlist/';
-    //this.targetUrl = this.proxy + this.watchlistUrl + username + '/watchlist/';
 
     if (this.username !== username) {
       /** clear array because this method has ben previously called with another username */
@@ -163,22 +138,19 @@ export class WatchlistService {
       this.username = username;
       this.userExists = true;
       this.chromeIsFuckingUs = false;
-      //console.log("about to check url: ", this.targetUrl) 
       console.log('checking if the user exists...')
-      //let response = await fetch(this.targetUrl)
-      let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`)
+  
+      let response = await this.fetchData()
+
+      return response
+
       //console.log('done ', responseString)
-      
+
       /* if (response.status === 503) {
         this.chromeIsFuckingUs = true
         //        throw new Error(`Response status: ${response.status}`);
         return response
-      }
-
-      if (response.status === 404) {
-        this.userExists = false;
       } */
-      return response
 
     } else {
       if (this.userExists) {
@@ -194,6 +166,29 @@ export class WatchlistService {
     }
   }
 
+  async fetchData() {
+    let aresponse = new Response;
+    let response = ''
+    try {
+      response = await lastValueFrom(this.http.get(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`,
+        { responseType: 'text' }
+      ))
+    }
+    catch (error) {
+      console.log('errorinho ', error)
+    }
+    if (response === 'nonExistentUser') {
+      //console.log("non existent user")
+      this.userExists = false;
+      aresponse = this.myResponse
+      return aresponse
+    } else {
+      //console.log("existent user")
+      aresponse = await fetch(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`)
+      return aresponse
+    }
+  }
+
   /** second method:
    * parse the targetUrl data obtained in first method
    * 1) checks if user has films in the watchlist and sets emptyWatchlist
@@ -202,183 +197,161 @@ export class WatchlistService {
    * the correct amount of elements in the URL array  
    */
   async createArrayOfURLs(username: string) {
-    this.targetUrl = this.watchlistUrl + this.username + '/watchlist/'
-    try {
-      //let response = await fetch(this.targetUrl);
-      let html = await this.myResponse.text();    
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, "text/html");
-      console.log(doc)
-      if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray)[0]) !== 0) {
-        console.log(`creating new array of urls for ${username}`)
-        let numPages = this.calculatePages(doc);
-        let i = 1;
-        do {
-          this.pages.push(this.targetUrl + "page/" + i.toString() + "/")
-          i++;
-        }
-        while (i <= numPages);
-
-        //restart variables for next search
-        this.isSameUser = false;
-        this.emptyWatchlist = false;
-      } else {
-        this.emptyWatchlist = true;
+  this.targetUrl = this.watchlistUrl + this.username + '/watchlist/'
+  try {
+    let html = await this.myResponse.text();
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(html, "text/html");
+    //console.log('doc is '+doc)
+    if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray)[0]) !== 0) {
+      console.log(`creating new array of urls for ${username}`)
+      let numPages = this.calculatePages(doc);
+      let i = 1;
+      do {
+        this.pages.push(this.targetUrl + "page/" + i.toString() + "/")
+        i++;
       }
-    }
-    catch (error) {
-      console.log(error)
-    }
-  };
+      while (i <= numPages);
 
-  /** aid method called from createArrayOfURLs() */
-  calculatePages(doc: Document): number {
-    let numPages: number = 1;
-    let cantPelisElement: Element = doc.querySelector('span.js-watchlist-count') as Element;
-    if (cantPelisElement && cantPelisElement.textContent) {
-      let textContent = cantPelisElement.textContent;
-      let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
-      numPages = Math.ceil(cantPelis / 28);
-    }
-    console.log(numPages+' pages will be necesary')
-    return numPages;
-  };
-
-  /** third method:
-   * will be called only if created a new array of urls
-   * (that is: userExists && !emptyWatchlist && !isSameUser ) 
-   */
-  populateWatchlist = async () => {
-    this.watchlist = [];
-    this.numFilms = 0;
-    console.log(`populating watchlist array for ${this.username}`)
-    let currentpage = 1
-    for (let page of this.pages) {
-      await this.scrape(`page=${currentpage}-user=${this.username}`)
-      currentpage+=1
-    }
-    console.log('done. this is the watchlist: ',this.watchlist)
-    //eliminated method: foreach doesnt have await/async support
-    //    this.pages.forEach((page) => this.scrape(page))
-  };
-
-  async scrape(pageAndUser: string) {
-    try {
-
-      //let response = await fetch(page, { method: "POST" });
-      console.log(`testing https://ltrbxdapi.vercel.app/api/page/${pageAndUser}/scrape`)
-      let response = await fetch (`https://ltrbxdapi.vercel.app/api/page/${pageAndUser}/scrape`)
-      let html = await response.text();
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, "text/html");
-      let a = doc.querySelectorAll('ul.poster-list > li > div > img');
-
-      a.forEach((title) => {
-        this.numFilms++;
-
-        /** specific url for each movie and for each movie poster 
-         * (those are 2 different links because of images-lazy-loading. see below)
-         
-         * worth of notice: the method will not scrap each poster for it would slow down
-         * since each poster would have to be fetched from a new url.
-         * so at this point "poster" attribute will be "not yet..." string  */
-
-        let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
-
-        let filmLink = 'https://letterboxd.com' + specUrl;
-        let imgUrlContainer = this.proxy + 'https://letterboxd.com/ajax/poster' + specUrl + 'std/125x187/'
-
-        this.watchlist.push({
-          name: title.getAttribute('alt') as string,
-          originalName: title.getAttribute('alt') as string,
-          poster: 'not yet...',
-          url: filmLink,
-          imgUrlContainer: imgUrlContainer,
-        })
-      })
-    }
-    catch (error) {
-      console.log(error)
+      //restart variables for next search
+      this.isSameUser = false;
+      this.emptyWatchlist = false;
+    } else {
+      this.emptyWatchlist = true;
     }
   }
+  catch (error) {
+    console.log(error)
+  }
+};
+
+/** aid method called from createArrayOfURLs() */
+calculatePages(doc: Document): number {
+  let numPages: number = 1;
+  let cantPelisElement: Element = doc.querySelector('span.js-watchlist-count') as Element;
+  if (cantPelisElement && cantPelisElement.textContent) {
+    let textContent = cantPelisElement.textContent;
+    let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
+    numPages = Math.ceil(cantPelis / 28);
+  }
+  console.log(numPages + ' pages will be necesary')
+  return numPages;
+};
+
+/** third method:
+ * will be called only if created a new array of urls
+ * (that is: userExists && !emptyWatchlist && !isSameUser ) 
+ */
+populateWatchlist = async () => {
+  this.watchlist = [];
+  this.numFilms = 0;
+  console.log(`populating watchlist array for ${this.username}`)
+  let currentpage = 1
+  for (let page of this.pages) {
+    await this.scrape(`page=${currentpage}-user=${this.username}`)
+    currentpage += 1
+  }
+  console.log('done. this is the watchlist: ', this.watchlist)
+};
+
+  async scrape(pageAndUser: string) {
+  try {
+    let response = await fetch(`https://ltrbxdapi.vercel.app/api/page/${pageAndUser}/scrape`)
+    let html = await response.text();
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(html, "text/html");
+    let a = doc.querySelectorAll('ul.poster-list > li > div > img');
+
+    a.forEach((title) => {
+      this.numFilms++;
+
+      /** specific url for each movie and for each movie poster 
+       * (those are 2 different links because of images-lazy-loading. see below)
+       
+       * worth of notice: the method will not scrap each poster for it would slow down
+       * since each poster would have to be fetched from a new url.
+       * so at this point "poster" attribute will be "not yet..." string  */
+
+      let specUrl = title.parentElement?.getAttribute('data-target-link') as string;
+
+      let filmLink = 'https://letterboxd.com' + specUrl;
+      let imgUrlContainer = 'https://letterboxd.com/ajax/poster' + specUrl + 'std/125x187/'
+
+      this.watchlist.push({
+        name: title.getAttribute('alt') as string,
+        originalName: title.getAttribute('alt') as string,
+        poster: 'not yet...',
+        url: filmLink,
+        imgUrlContainer: imgUrlContainer,
+      })
+    })
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
 
   /** fourth method
    * choose a randomFilm from the watchlist[]
    * will be called only if userExists && !emptyWatchlist 
    * will fetch 2 strings film-specific: original name (if exists) and poster url. See below
    */
-  async pickRandomFilm(numFilms: number): Promise<Film> {
-    console.log('picking a random film...')
+  async pickRandomFilm(numFilms: number): Promise < Film > {
+  console.log('picking a random film...')
     this.randomNumber = this.getRandomInteger(1, numFilms);
-    this.randomFilm = this.watchlist[this.randomNumber];
-    console.log('random film picked: ', this.randomFilm.originalName)
+  this.randomFilm = this.watchlist[this.randomNumber];
+  console.log('random film picked: ', this.randomFilm.originalName)
 
-    /** ltbxd sometimes displays title in english and some times displays 
-     * the original name, below is the method to ensure both are fetched if exists 
-     * case not: originalName was inicialized same as name in the previous method
-     * the component will check if name !== originalName to know if there is, in fact, an originalName */
+    /* ltbxd sometimes displays the EEUU release title and sometimes displays 
+    the original language title. below is the method to ensure both are fetched if they
+    both exists. case not: originalName was inicialized same as name in the previous method
+    so the component will check if name !== originalName to know if there is,
+    in fact, an originalName */
 
     try {
-      await this.sleep(10000);
-      console.log('searching for the original name...')
-      let response = await fetch(this.proxy + this.randomFilm.url);
-      let html = await response.text();
+    console.log('searching for the original name...')
+      //console.log(this.randomFilm.url.split('film/').pop())
+      let response = await fetch(`https://ltrbxdapi.vercel.app/api/randomfilmurl/${this.randomFilm.url.split('film/').pop()}poster`);
+    let html = await response.text();
 
-      if (html.includes(`<h2 class="originalname">`)) {
-        let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
-        this.randomFilm.originalName = originalTitle;
-      }
-      console.log('...done. original name: ', this.randomFilm.originalName)
-
-      /** old method to get the original name. new one is more efficient
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, "text/html");
-      let j = doc.querySelector('h2.originalname')?.textContent;
-      if (j) {
-        this.randomFilm.originalName = j
-      } 
-      */
+    if(html.includes(`<h2 class="originalname">`)) {
+  let originalTitle = (html.split(`<h2 class="originalname">`)[1]).split(`</h2>`)[0].replace(`&#039;`, `'`);
+  this.randomFilm.originalName = originalTitle;
+}
+console.log('...done. original name: ', this.randomFilm.originalName)
     }
     catch (error) {
-      console.log(error)
-    }
+  console.log(error)
+}
 
-    /** because of the type of lazy loading, image urls wont be at the first url fetched
-     *  so image urls are fetched in this concatenated method. */
-    try {
-      await this.sleep(60000);
-      console.log('fetching the url with the poster')
-      let response = await fetch(this.randomFilm.imgUrlContainer);
-      console.log('done, fetch results: ', response)
-      let html = await response.text();
-      console.log(html)
-
-      let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
-      this.randomFilm.poster = posterUrl;
-
-      /** as with the original name method.
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, "text/html");
-      let i = doc.querySelector('img');
-      this.randomFilm.poster = (i?.getAttribute('src') as string).replace("125-0-187", "460-0-690");
-      */
-    }
-    catch (error) {
-      console.log(error)
-    }
-    return this.randomFilm;
+/** because of the type of lazy loading, image urls wont be at the first url fetched
+ *  so image urls are fetched in this concatenated method. */
+try {
+  console.log('fetching the url with the poster...')
+  //console.log(`img Url Container = ${this.randomFilm.imgUrlContainer}`)
+  let response = await fetch(`https://ltrbxdapi.vercel.app/api/randomfilmposter/${this.randomFilm.url.split('film/').pop()}posterurl`);
+  console.log("...done")
+  //console.log('done, fetch results: ', response)
+  let html = await response.text();
+  let posterUrl = (html.split(`src="`)[1]).split(` srcset="`)[0].replace("125-0-187", "460-0-690");
+  this.randomFilm.poster = posterUrl;
+}
+catch (error) {
+  console.log(error)
+}
+return this.randomFilm;
 
   }
-  getRandomInteger = (min: number, max: number) => {
-    min = Math.ceil(min)
-    max = Math.floor(max)
+getRandomInteger = (min: number, max: number) => {
+  min = Math.ceil(min)
+  max = Math.floor(max)
 
-    return Math.floor(Math.random() * (max - min)) + min
-  }
+  return Math.floor(Math.random() * (max - min)) + min
+}
 
-  sleep(ms: number): Promise<void> {
-    console.log('very tired, sleeping for '+ms/1000+' seconds')
+sleep(ms: number): Promise < void> {
+  console.log('very tired, sleeping for ' + ms / 1000 + ' seconds')
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
 }
