@@ -162,7 +162,7 @@ export class WatchlistService {
       //console.log("about to check url: ", this.targetUrl) 
       console.log('checking if the user exists...')
       //let response = await fetch(this.targetUrl)
-      let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.targetUrl}/watchlist`)
+      let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`)
 
       console.log('done ',response)
       
