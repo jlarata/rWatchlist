@@ -149,7 +149,8 @@ export class WatchlistService {
 
   async checkUserExists(username: string) {
     //this.targetUrl = this.proxy+this.watchlistUrl+username+'/watchlist/';
-    this.targetUrl = this.proxy + this.watchlistUrl + username + '/watchlist/';
+    this.targetUrl = this.watchlistUrl + username + '/watchlist/';
+    //this.targetUrl = this.proxy + this.watchlistUrl + username + '/watchlist/';
 
     if (this.username !== username) {
       /** clear array because this method has ben previously called with another username */
