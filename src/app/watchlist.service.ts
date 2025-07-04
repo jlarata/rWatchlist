@@ -85,6 +85,8 @@ export class WatchlistService {
     
     //await this.sleep(45000)
     this.myResponse = await this.checkUserExists(username);
+    
+    //this.myResponseString = await this.checkUserExists(username);
 
     if (this.chromeIsFuckingUs) {
       console.log('chrome CORS policy is idiotic')
@@ -165,10 +167,9 @@ export class WatchlistService {
       console.log('checking if the user exists...')
       //let response = await fetch(this.targetUrl)
       let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`)
-
-      console.log('done ',response.text())
+      //console.log('done ', responseString)
       
-      if (response.status === 503) {
+      /* if (response.status === 503) {
         this.chromeIsFuckingUs = true
         //        throw new Error(`Response status: ${response.status}`);
         return response
@@ -176,7 +177,7 @@ export class WatchlistService {
 
       if (response.status === 404) {
         this.userExists = false;
-      }
+      } */
       return response
 
     } else {
@@ -201,12 +202,13 @@ export class WatchlistService {
    * the correct amount of elements in the URL array  
    */
   async createArrayOfURLs(username: string) {
-    this.targetUrl = this.proxy + this.watchlistUrl + this.username + '/watchlist/'
+    this.targetUrl = this.watchlistUrl + this.username + '/watchlist/'
     try {
       //let response = await fetch(this.targetUrl);
-      let html = await this.myResponse.text();
+      let html = await this.myResponse.text();    
       let parser = new DOMParser();
       let doc = parser.parseFromString(html, "text/html");
+      console.log(doc)
       if (Number((((doc.querySelector('span.js-watchlist-count') as Element).textContent as String).match(/\d+/) as RegExpMatchArray)[0]) !== 0) {
         console.log(`creating new array of urls for ${username}`)
         let numPages = this.calculatePages(doc);
@@ -238,6 +240,7 @@ export class WatchlistService {
       let cantPelis = Number((textContent.match(/\d+/) as RegExpMatchArray)[0]);
       numPages = Math.ceil(cantPelis / 28);
     }
+    console.log(numPages+' pages will be necesary')
     return numPages;
   };
 
@@ -249,18 +252,22 @@ export class WatchlistService {
     this.watchlist = [];
     this.numFilms = 0;
     console.log(`populating watchlist array for ${this.username}`)
+    let currentpage = 1
     for (let page of this.pages) {
-      await this.scrape(page)
+      await this.scrape(`page=${currentpage}-user=${this.username}`)
+      currentpage+=1
     }
     console.log('done. this is the watchlist: ',this.watchlist)
     //eliminated method: foreach doesnt have await/async support
     //    this.pages.forEach((page) => this.scrape(page))
   };
 
-  async scrape(page: string) {
+  async scrape(pageAndUser: string) {
     try {
 
-      let response = await fetch(page, { method: "POST" });
+      //let response = await fetch(page, { method: "POST" });
+      console.log(`testing https://ltrbxdapi.vercel.app/api/page/${pageAndUser}/scrape`)
+      let response = await fetch (`https://ltrbxdapi.vercel.app/api/page/${pageAndUser}/scrape`)
       let html = await response.text();
       let parser = new DOMParser();
       let doc = parser.parseFromString(html, "text/html");
