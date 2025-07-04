@@ -27,6 +27,8 @@ export class WatchlistService {
   private myBlob = new Blob();
   private myOptions = { status: 200, statusText: "SuperSmashingGreat!" };
   private myResponse = new Response(this.myBlob, this.myOptions);
+  private myResponseString = ''
+
 
 
   /********   useful variables   ********/
@@ -164,7 +166,7 @@ export class WatchlistService {
       //let response = await fetch(this.targetUrl)
       let response = await fetch(`https://ltrbxdapi.vercel.app/api/${this.username}/watchlist`)
 
-      console.log('done ',response)
+      console.log('done ',response.text())
       
       if (response.status === 503) {
         this.chromeIsFuckingUs = true
