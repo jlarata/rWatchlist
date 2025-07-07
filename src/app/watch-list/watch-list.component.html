@@ -15,8 +15,8 @@
                             <div class="mt-1 has-text-warning-light has-text-weight-bold" *ngIf="username">
                                 Hi, {{username | uppercase}}
                             </div>
-                            <button *ngIf="(isLoaded == false) && (isLoading == false) && (emptyWatchList == false)" class="button is-dark" type="button" (click)="getRandomFilm()">Pick a random movie for me please!</button>
-                            <button *ngIf="isLoaded" class="button is-dark" type="button" (click)="getRandomFilm()">Pick again please!</button>
+                            <button *ngIf="(isLoaded == false) && (isLoading == false) && (emptyWatchList == false)" class="button is-dark" type="button" (click)="getRandomFilm()" [disabled]="(username=='')">Pick a random movie for me please!</button>
+                            <button *ngIf="isLoaded" class="button is-dark" type="button" (click)="getRandomFilm()" [disabled]="(username=='')">Pick again please!</button>
 
                         </div>
                 </div>
